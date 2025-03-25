@@ -9,7 +9,7 @@ import (
 type ExitHandler struct {
 }
 
-func (h ExitHandler) Handle(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+func (h ExitHandler) Handle(bot *tgbotapi.BotAPI, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
 
@@ -22,4 +22,5 @@ func (h ExitHandler) Handle(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	} else {
 		bot.Send(tgbotapi.NewMessage(chatID, "Слыш, ты и так не в программе!"))
 	}
+	return nil
 }

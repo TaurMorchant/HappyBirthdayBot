@@ -7,6 +7,7 @@ import (
 type RemindHandler struct {
 }
 
-func (h RemindHandler) Handle(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+func (h RemindHandler) Handle(bot *tgbotapi.BotAPI, update tgbotapi.Update) error {
 
+	return nil
 }

@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"happy-birthday-bot/handler"
-	"happy-birthday-bot/handler/impl"
+	"happy-birthday-bot/handlers"
+	"happy-birthday-bot/handlers/impl"
 	"log"
 	"os"
 )
@@ -31,24 +31,41 @@ func main() {
 	updates := bot.GetUpdatesChan(u)
 
 	for update := range updates {
-		if update.Message == nil { // Игнорируем не сообщения
-			log.Println("NOT MESSAGE ", update)
-			continue
+		handleUpdate(bot, update)
+	}
+}
+
+func handleUpdate(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+	defer handlePanic(bot, update)
+
+	if update.Message == nil {
+		return
+	}
+
+	log.Printf("Принято сообщение: %s", update.Message.Text)
+
+	if update.Message.ReplyToMessage != nil && update.Message.ReplyToMessage.From.ID == BotID {
+		handleReply(bot, update)
+	} else if update.Message.IsCommand() {
+		handler, ok := handlers.Handlers[update.Message.Command()]
+		if !ok {
+			bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("Я не знаю команду '%s', откуда ты ее взял?", update.Message.Command())))
+			return
 		}
-
-		log.Printf("Принято сообщение: %s", update.Message.Text)
-
-		if update.Message.ReplyToMessage != nil && update.Message.ReplyToMessage.From.ID == BotID {
-			handleReply(bot, update)
-		} else if update.Message.IsCommand() {
-			handler, ok := handler.Handlers[update.Message.Command()]
-			if !ok {
-				bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("Я не знаю команду '%s', откуда ты ее взял?", update.Message.Command())))
-				continue
-			}
-			handler.Handle(bot, update)
+		err := handler.Handle(bot, update)
+		if err != nil {
+			message := fmt.Sprintf("Случилась какая-то неведомая фигня, напиши @morchant об этом, пожалуйста")
+			bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, message))
 		}
 	}
+}
+
+func handlePanic(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+	p := recover()
+	err, _ := p.(error)
+	log.Println("Panic: ", err)
+	message := fmt.Sprintf("Случилась какая-то неведомая фигня, напиши @morchant об этом, пожалуйста")
+	bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, message))
 }
 
 func handleReply(bot *tgbotapi.BotAPI, update tgbotapi.Update) {

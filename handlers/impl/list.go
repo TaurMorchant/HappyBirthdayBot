@@ -10,7 +10,7 @@ import (
 type ListHandler struct {
 }
 
-func (h ListHandler) Handle(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+func (h ListHandler) Handle(bot *tgbotapi.BotAPI, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
 
 	msg := "📅 Список всех участников:\n```\n"
@@ -25,4 +25,6 @@ func (h ListHandler) Handle(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	message := tgbotapi.NewMessage(chatID, msg)
 	message.ParseMode = "markdown"
 	bot.Send(message)
+
+	return nil
 }

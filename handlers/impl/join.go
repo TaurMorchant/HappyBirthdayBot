@@ -16,7 +16,7 @@ type JoinHandler struct {
 
 var joinRequests = cache.New(30*time.Second, 30*time.Second)
 
-func (h JoinHandler) Handle(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+func (h JoinHandler) Handle(bot *tgbotapi.BotAPI, update tgbotapi.Update) error {
 	log.Printf("handle join command")
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
@@ -28,11 +28,12 @@ func (h JoinHandler) Handle(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 
 	sentMess, err := bot.Send(message)
 	if err != nil {
-		log.Println("Ошибка отправки сообщения:", err)
+		return err
 	}
 	log.Printf("ID отправленного сообщения: %s", sentMess.MessageID)
 	joinRequests.Add(strconv.FormatInt(userID, 10), "wait for reply", cache.DefaultExpiration)
 	log.Println("join requests: ", joinRequests)
+	return err
 }
 
 func HandleReply(bot *tgbotapi.BotAPI, update tgbotapi.Update) error {
