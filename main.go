@@ -7,6 +7,7 @@ import (
 	"happy-birthday-bot/handlers/impl"
 	"log"
 	"os"
+	"runtime/debug"
 )
 
 const BotID = 7947290853
@@ -22,6 +23,21 @@ func main() {
 	}
 
 	//bot.Debug = true
+
+	// Определяем команды
+	commands := []tgbotapi.BotCommand{
+		{Command: handlers.Test, Description: "test"},
+		{Command: handlers.List, Description: "Посмотреть всех в программе"},
+		{Command: handlers.Join, Description: "Присоединиться к прогррамме"},
+		{Command: handlers.Exit, Description: "Выйти из программы"},
+		{Command: handlers.Reminders, Description: "Ближайшие дни рождения"},
+	}
+
+	// Устанавливаем команды
+	_, err = bot.Request(tgbotapi.SetMyCommandsConfig{Commands: commands})
+	if err != nil {
+		log.Panic(err)
+	}
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
@@ -62,10 +78,15 @@ func handleUpdate(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 
 func handlePanic(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	p := recover()
-	err, _ := p.(error)
-	log.Println("Panic: ", err)
-	message := fmt.Sprintf("Случилась какая-то неведомая фигня, напиши @morchant об этом, пожалуйста")
-	bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, message))
+	if p == nil {
+		return
+	}
+	if err, ok := p.(error); ok {
+		log.Println("Panic: ", err)
+		fmt.Println(string(debug.Stack()))
+		message := fmt.Sprintf("Случилась какая-то неведомая фигня, напиши @morchant об этом, пожалуйста")
+		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, message))
+	}
 }
 
 func handleReply(bot *tgbotapi.BotAPI, update tgbotapi.Update) {

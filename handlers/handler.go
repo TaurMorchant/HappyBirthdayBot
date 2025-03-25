@@ -10,8 +10,9 @@ type IHandler interface {
 }
 
 var Handlers = map[string]IHandler{
-	Test: &impl.TestHandler{},
-	Join: &impl.JoinHandler{},
-	Exit: &impl.ExitHandler{},
-	List: &impl.ListHandler{},
+	Test:  &impl.TestHandler{},
+	Start: &impl.StartHandler{},
+	Join:  &impl.JoinHandler{},
+	Exit:  &impl.ExitHandler{},
+	List:  &impl.ListHandler{},
 }
