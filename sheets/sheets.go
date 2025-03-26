@@ -17,7 +17,7 @@ import (
 // Укажи путь к JSON-ключу
 const credentialsFile = "happybirthdaybot-454814-2dec5157295e.json"
 const spreadsheetID = "1fb5ssf4Mp8HZ9aAFAOox9byQGUHstRub_5ssOdDoNro"
-const readRange = "Data!A1:C30"
+const readRange = "Data!A2:C30"
 const writeRange = "Data!A2"
 
 var srv *sheets.Service
@@ -54,10 +54,7 @@ func Read() usr.Users {
 		log.Fatalf("Ошибка при чтении данных: %v", err)
 	}
 
-	for i, row := range resp.Values {
-		if i == 0 {
-			continue
-		}
+	for _, row := range resp.Values {
 		user := readUser(row)
 		if user != nil {
 			result.Add(*user)
@@ -70,7 +67,7 @@ func Write(users *usr.Users) {
 	// Данные для записи (диапазон "A1:B1")
 	var values [][]interface{}
 	for _, user := range users.GetAllUsers() {
-		userRow := []interface{}{user.Id, user.Name, date.FormatDate(user.Birthday.Time)}
+		userRow := []interface{}{user.Id, user.Name, date.FormatDate(user.GetBirthday().Time)}
 		values = append(values, userRow)
 	}
 
@@ -107,5 +104,8 @@ func readUser(row []interface{}) *usr.User {
 		log.Fatalf("Ошибка при чтении date. row: %s. Err: %s", row, err)
 	}
 
-	return &usr.User{Id: usr.UserId(id), Name: name, Birthday: date.ToBirthday(dateTime)}
+	result := &usr.User{Id: usr.UserId(id), Name: name}
+	result.SetBirthday(dateTime, time.Now())
+
+	return result
 }

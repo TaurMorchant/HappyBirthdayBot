@@ -7,12 +7,11 @@ import (
 	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
 	"log"
+	"time"
 )
 
 type JoinHandler struct {
 }
-
-//var joinRequests = cache.New(30*time.Second, 30*time.Second)
 
 func (h JoinHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	log.Printf("handle join command")
@@ -32,41 +31,9 @@ func (h JoinHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 
 	bot.SendWithEH(message)
 
-	WaitReply(usr.UserId(userID), h)
-	//err := joinRequests.Add(strconv.FormatInt(userID, 10), "wait for reply", cache.DefaultExpiration)
-	//if err != nil {
-	//	log.Panicln("Cannot register join request!: ", err)
-	//}
-	//log.Println("join requests: ", joinRequests)
+	WaitForReply(usr.UserId(userID), h)
 	return nil
 }
-
-//func HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
-//	log.Printf("handle reply command")
-//	chatID := update.Message.Chat.ID
-//	userID := update.Message.From.ID
-//
-//	_, ok := joinRequests.Get(strconv.FormatInt(userID, 10))
-//	if ok {
-//		users := sheets.Read()
-//		if _, ok := users.Get(usr.UserId(userID)); ok {
-//			bot.SendWithEH(tgbotapi.NewMessage(chatID, "Ты уже зарегистрирован!"))
-//			return nil
-//		}
-//
-//		name, birthdate, err := date.ParseNameAndBirthdate(update.Message.Text)
-//		if err != nil {
-//			return err
-//		}
-//
-//		users.Add(usr.User{Id: usr.UserId(userID), Name: name, Birthday: date.ToBirthday(birthdate)})
-//		sheets.Write(&users)
-//
-//		bot.SendWithEH(tgbotapi.NewMessage(chatID, "Поздравляю, теперь тебя отхеппибёздят!"))
-//		joinRequests.Delete(strconv.FormatInt(userID, 10))
-//	}
-//	return nil
-//}
 
 func (h JoinHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
@@ -83,7 +50,10 @@ func (h JoinHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
 		return err
 	}
 
-	users.Add(usr.User{Id: usr.UserId(userID), Name: name, Birthday: date.ToBirthday(birthdate)})
+	user := usr.User{Id: usr.UserId(userID), Name: name}
+	user.SetBirthday(birthdate, time.Now())
+
+	users.Add(user)
 	sheets.Write(&users)
 
 	bot.SendWithEH(tgbotapi.NewMessage(chatID, "Поздравляю, теперь тебя отхеппибёздят!"))

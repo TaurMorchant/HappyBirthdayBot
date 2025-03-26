@@ -23,7 +23,7 @@ func (h ExitHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 		message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true} // Принудительный reply-режим
 		bot.SendWithEH(message)
 
-		WaitReply(usr.UserId(userID), h)
+		WaitForReply(usr.UserId(userID), h)
 	} else {
 		bot.SendWithEH(tgbotapi.NewMessage(chatID, "Слыш, ты и так не в программе!"))
 	}

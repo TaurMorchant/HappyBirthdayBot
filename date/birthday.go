@@ -26,6 +26,8 @@ var months = map[time.Month]string{
 	time.December:  "декабря",
 }
 
+//-----------------------------------------------------
+
 func ToBirthday(input time.Time) Birthday {
 	currentYear := time.Now().Year()
 
@@ -38,4 +40,12 @@ func ToBirthday(input time.Time) Birthday {
 
 func (b Birthday) ToString() string {
 	return fmt.Sprintf("%-2d %s", b.day, b.month)
+}
+
+func (b Birthday) GetMonth() string {
+	return b.month
+}
+
+func (b Birthday) GetDay() int {
+	return b.day
 }

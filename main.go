@@ -5,6 +5,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"happy-birthday-bot/bot"
 	"happy-birthday-bot/handlers"
+	"happy-birthday-bot/restrictions"
 	"happy-birthday-bot/usr"
 	"io"
 	"log"
@@ -24,6 +25,8 @@ func main() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 10
 	updates := hapBirBot.GetUpdatesChan(u)
+
+	//startReminderTask(hapBirBot)
 
 	for update := range updates {
 		handleUpdate(hapBirBot, update)
@@ -75,6 +78,19 @@ func handleUpdate(bot *bot.Bot, update tgbotapi.Update) {
 	defer handlePanic(bot, update)
 
 	if update.Message == nil {
+		return
+	}
+
+	log.Println("update.Message.From.ID", update.Message.From.ID)
+	log.Println("update.Message.Chat.ID", update.Message.Chat.ID)
+
+	if !restrictions.IsUserAllowed(update.Message.From.ID) {
+		bot.SendWithEH(tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("Прости %s, мне запрещено с тобой общаться!", update.Message.From.UserName)))
+		return
+	}
+
+	if !restrictions.IsChatAllowed(update.Message.Chat.ID) {
+		bot.SendWithEH(tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("Прости, мне запрещено общаться в этом чате!")))
 		return
 	}
 
@@ -131,15 +147,4 @@ func handleReply(bot *bot.Bot, update tgbotapi.Update) {
 		}
 		handlers.RemoveWaitingHandler(usr.UserId(userID))
 	}
-
-	//
-	//err := handlers2.HandleReply(bot, update)
-	//if err != nil {
-	//	log.Println(err)
-	//
-	//	message := tgbotapi.NewMessage(chatID, err.Error())
-	//	message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true}
-	//	message.ParseMode = tgbotapi.ModeMarkdown
-	//	bot.SendWithEH(message)
-	//}
 }

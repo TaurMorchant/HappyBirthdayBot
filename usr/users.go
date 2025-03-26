@@ -1,29 +1,15 @@
 package usr
 
 import (
-	"fmt"
-	"happy-birthday-bot/date"
 	"sort"
 	"unicode/utf8"
 )
 
-type UserId int64
-
-type User struct {
-	Id       UserId
-	Name     string
-	Birthday date.Birthday
-}
-
-func (u User) FormattedString(maxNameLength int) string {
-	return fmt.Sprintf("🎂 %*s — %-10s", maxNameLength, u.Name, u.Birthday.ToString())
-}
-
-//------------------
-
 type Users struct {
 	users []User
 }
+
+//---------------------------------------------------------------------------------------------------------------------
 
 func (u *Users) GetAllUsers() []User {
 	return u.users
@@ -61,10 +47,39 @@ func (u *Users) GetMaxNameLength() int {
 	return result
 }
 
-//-----------------------------------------
+func (u *Users) GetNextBirthdayUsers(n int) ([]User, error) {
+	if n > len(u.GetAllUsers()) {
+		n = len(u.GetAllUsers())
+	}
+
+	var result []User
+
+	sortedUsers := u.sortByDaysBeforeBirthday()
+
+	for i := 0; i < n; i++ {
+		result = append(result, sortedUsers.GetAllUsers()[i])
+	}
+
+	return result, nil
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 
 func (u *Users) sort() {
 	sort.Slice(u.users, func(i, j int) bool {
-		return u.users[i].Birthday.Time.Before(u.users[j].Birthday.Time)
+		return u.users[i].birthday.Time.Before(u.users[j].birthday.Time)
 	})
+}
+
+func (u *Users) sortByDaysBeforeBirthday() *Users {
+	result := Users{}
+	usersClone := make([]User, len(u.users))
+	copy(usersClone, u.users)
+	result.users = usersClone
+
+	sort.Slice(result.users, func(i, j int) bool {
+		return result.users[i].daysBeforeBirthday < (result.users[j].daysBeforeBirthday)
+	})
+
+	return &result
 }

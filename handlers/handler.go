@@ -26,7 +26,7 @@ var Handlers = map[string]IHandler{
 
 var waitingHandlers = cache.New(30*time.Second, 1*time.Minute)
 
-func WaitReply(userId usr.UserId, handler IHandler) {
+func WaitForReply(userId usr.UserId, handler IHandler) {
 	err := waitingHandlers.Add(fmt.Sprintf("%d", userId), handler, cache.DefaultExpiration)
 	if err != nil {
 		log.Panicln("Cannot add element to cache: ", err)
