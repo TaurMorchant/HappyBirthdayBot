@@ -1,16 +1,17 @@
-package impl
+package handlers
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"happy-birthday-bot/bot"
 )
 
 type TestHandler struct {
 }
 
-func (h TestHandler) Handle(bot *tgbotapi.BotAPI, update tgbotapi.Update) error {
+func (h TestHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
 
-	bot.Send(tgbotapi.NewMessage(chatID, "test"))
+	bot.SendWithEH(tgbotapi.NewMessage(chatID, "test"))
 
 	return nil
 }

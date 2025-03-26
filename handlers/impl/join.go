@@ -1,8 +1,9 @@
-package impl
+package handlers
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/patrickmn/go-cache"
+	"happy-birthday-bot/bot"
 	"happy-birthday-bot/date"
 	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
@@ -16,7 +17,7 @@ type JoinHandler struct {
 
 var joinRequests = cache.New(30*time.Second, 30*time.Second)
 
-func (h JoinHandler) Handle(bot *tgbotapi.BotAPI, update tgbotapi.Update) error {
+func (h JoinHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	log.Printf("handle join command")
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
@@ -26,17 +27,17 @@ func (h JoinHandler) Handle(bot *tgbotapi.BotAPI, update tgbotapi.Update) error 
 	message.ParseMode = tgbotapi.ModeMarkdown
 	message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true} // Принудительный reply-режим
 
-	sentMess, err := bot.Send(message)
-	if err != nil {
-		return err
-	}
+	sentMess := bot.SendWithEH(message)
 	log.Printf("ID отправленного сообщения: %s", sentMess.MessageID)
-	joinRequests.Add(strconv.FormatInt(userID, 10), "wait for reply", cache.DefaultExpiration)
+	err := joinRequests.Add(strconv.FormatInt(userID, 10), "wait for reply", cache.DefaultExpiration)
+	if err != nil {
+		log.Panicln("Cannot register join request!: ", err)
+	}
 	log.Println("join requests: ", joinRequests)
-	return err
+	return nil
 }
 
-func HandleReply(bot *tgbotapi.BotAPI, update tgbotapi.Update) error {
+func HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
 	log.Printf("handle reply command")
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
@@ -45,21 +46,19 @@ func HandleReply(bot *tgbotapi.BotAPI, update tgbotapi.Update) error {
 	if ok {
 		users := sheets.Read()
 		if _, ok := users.Get(usr.UserId(userID)); ok {
-			bot.Send(tgbotapi.NewMessage(chatID, "Ты уже зарегистрирован!"))
+			bot.SendWithEH(tgbotapi.NewMessage(chatID, "Ты уже зарегистрирован!"))
 			return nil
 		}
 
 		name, birthdate, err := date.ParseNameAndBirthdate(update.Message.Text)
 		if err != nil {
-			//log.Printf(err.Error())
-			//bot.Send(tgbotapi.NewMessage(chatID, err.Error()))
 			return err
 		}
 
 		users.Add(usr.User{Id: usr.UserId(userID), Name: name, Birthday: birthdate})
 		sheets.Write(&users)
 
-		bot.Send(tgbotapi.NewMessage(chatID, "Поздравляю, теперь тебя отхеппибёздят!"))
+		bot.SendWithEH(tgbotapi.NewMessage(chatID, "Поздравляю, теперь тебя отхеппибёздят!"))
 		joinRequests.Delete(strconv.FormatInt(userID, 10))
 	}
 	return nil
