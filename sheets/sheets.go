@@ -79,7 +79,11 @@ func Write(users *usr.Users) {
 	}
 
 	// Записываем данные
-	_, err := srv.Spreadsheets.Values.Update(spreadsheetID, writeRange, valueRange).ValueInputOption("RAW").Do()
+	_, err := srv.Spreadsheets.Values.Clear(spreadsheetID, readRange, &sheets.ClearValuesRequest{}).Do()
+	if err != nil {
+		log.Fatalf("Ошибка при удалении данных: %v", err)
+	}
+	_, err = srv.Spreadsheets.Values.Update(spreadsheetID, writeRange, valueRange).ValueInputOption("RAW").Do()
 	if err != nil {
 		log.Fatalf("Ошибка при записи данных: %v", err)
 	}

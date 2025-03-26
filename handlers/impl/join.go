@@ -22,6 +22,12 @@ func (h JoinHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
 
+	users := sheets.Read()
+	if _, ok := users.Get(usr.UserId(userID)); ok {
+		bot.SendWithEH(tgbotapi.NewMessage(chatID, "Ты уже зарегистрирован!"))
+		return nil
+	}
+
 	msg := "Отлично! Ответь на это сообщение вот так:\n\n`<Твое имя>, <дата рождения в формате DD.MM.YYYY>`\n\nНапример:\n\n`Вася Пупкин, 25.03.1990`"
 	message := tgbotapi.NewMessage(chatID, msg)
 	message.ParseMode = tgbotapi.ModeMarkdown

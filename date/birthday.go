@@ -37,5 +37,5 @@ func ToBirthday(input time.Time) Birthday {
 }
 
 func (b Birthday) ToString() string {
-	return fmt.Sprintf("%d %s", b.day, b.month)
+	return fmt.Sprintf("%-2d %s", b.day, b.month)
 }
