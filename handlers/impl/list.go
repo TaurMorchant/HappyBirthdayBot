@@ -1,10 +1,8 @@
 package handlers
 
 import (
-	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"happy-birthday-bot/bot"
-	"happy-birthday-bot/date"
 	"happy-birthday-bot/sheets"
 	"log"
 )
@@ -21,8 +19,10 @@ func (h ListHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	users := sheets.Read()
 	usersSlice := users.GetAllUsers()
 
+	maxNameLength := users.GetMaxNameLength()
+
 	for _, user := range usersSlice {
-		msg += fmt.Sprintf("🎂 %*s — %10s\n", users.GetMaxNameLength(), user.Name, date.FormatDate(user.Birthday))
+		msg += user.FormattedString(maxNameLength) + "\n"
 	}
 	msg += "\n```"
 	message := tgbotapi.NewMessage(chatID, msg)

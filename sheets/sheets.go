@@ -70,7 +70,7 @@ func Write(users *usr.Users) {
 	// Данные для записи (диапазон "A1:B1")
 	var values [][]interface{}
 	for _, user := range users.GetAllUsers() {
-		userRow := []interface{}{user.Id, user.Name, date.FormatDate(user.Birthday)}
+		userRow := []interface{}{user.Id, user.Name, date.FormatDate(user.Birthday.Time)}
 		values = append(values, userRow)
 	}
 
@@ -98,10 +98,10 @@ func readUser(row []interface{}) *usr.User {
 	if err != nil {
 		log.Fatalf("Ошибка при чтении ID. row: %s. Err: %s", row, err)
 	}
-	date, err := time.Parse(date.Layout, dateStr)
+	dateTime, err := time.Parse(date.Layout, dateStr)
 	if err != nil {
 		log.Fatalf("Ошибка при чтении date. row: %s. Err: %s", row, err)
 	}
 
-	return &usr.User{Id: usr.UserId(id), Name: name, Birthday: date}
+	return &usr.User{Id: usr.UserId(id), Name: name, Birthday: date.ToBirthday(dateTime)}
 }

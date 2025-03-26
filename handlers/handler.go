@@ -11,9 +11,10 @@ type IHandler interface {
 }
 
 var Handlers = map[string]IHandler{
-	Test:  &handlers.TestHandler{},
-	Start: &handlers.StartHandler{},
-	Join:  &handlers.JoinHandler{},
-	Exit:  &handlers.ExitHandler{},
-	List:  &handlers.ListHandler{},
+	Test:      &handlers.TestHandler{},
+	Start:     &handlers.StartHandler{},
+	Join:      &handlers.JoinHandler{},
+	Exit:      &handlers.ExitHandler{},
+	List:      &handlers.ListHandler{},
+	Reminders: &handlers.RemindHandler{},
 }

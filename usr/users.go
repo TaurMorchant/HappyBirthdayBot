@@ -1,8 +1,9 @@
 package usr
 
 import (
+	"fmt"
+	"happy-birthday-bot/date"
 	"sort"
-	"time"
 	"unicode/utf8"
 )
 
@@ -11,8 +12,14 @@ type UserId int64
 type User struct {
 	Id       UserId
 	Name     string
-	Birthday time.Time
+	Birthday date.Birthday
 }
+
+func (u User) FormattedString(maxNameLength int) string {
+	return fmt.Sprintf("🎂 %*s — %-10s", maxNameLength, u.Name, u.Birthday.ToString())
+}
+
+//------------------
 
 type Users struct {
 	users []User
@@ -58,6 +65,6 @@ func (u *Users) GetMaxNameLength() int {
 
 func (u *Users) sort() {
 	sort.Slice(u.users, func(i, j int) bool {
-		return u.users[i].Birthday.Before(u.users[j].Birthday)
+		return u.users[i].Birthday.Time.Before(u.users[j].Birthday.Time)
 	})
 }

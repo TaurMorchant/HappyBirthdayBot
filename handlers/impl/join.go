@@ -55,7 +55,7 @@ func HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
 			return err
 		}
 
-		users.Add(usr.User{Id: usr.UserId(userID), Name: name, Birthday: birthdate})
+		users.Add(usr.User{Id: usr.UserId(userID), Name: name, Birthday: date.ToBirthday(birthdate)})
 		sheets.Write(&users)
 
 		bot.SendWithEH(tgbotapi.NewMessage(chatID, "Поздравляю, теперь тебя отхеппибёздят!"))
