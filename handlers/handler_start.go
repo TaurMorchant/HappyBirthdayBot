@@ -15,3 +15,7 @@ func (h StartHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 
 	return nil
 }
+
+func (h StartHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
+	return nil
+}

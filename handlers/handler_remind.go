@@ -36,7 +36,7 @@ func (h RemindHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 		}
 	}
 	lastIndex := i
-	if lastIndex < numberOfNames-1 {
+	if lastIndex < numberOfNames {
 		timeNow = timeNow.AddDate(-1, 0, 0)
 		for j := 0; j < numberOfNames-lastIndex; j++ {
 			result[i] = formatterStr(&users.GetAllUsers()[j], timeNow, maxNameLength)
@@ -60,4 +60,8 @@ func formatterStr(user *usr.User, time time.Time, maxNameLength int) string {
 	duration := user.Birthday.Sub(time)
 	days := int(duration.Hours() / 24)
 	return user.FormattedString(maxNameLength) + fmt.Sprintf(" (еще %d дней)", days)
+}
+
+func (h RemindHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
+	return nil
 }

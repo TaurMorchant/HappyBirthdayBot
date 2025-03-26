@@ -5,7 +5,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"happy-birthday-bot/bot"
 	"happy-birthday-bot/handlers"
-	handlers2 "happy-birthday-bot/handlers/impl"
+	"happy-birthday-bot/usr"
 	"io"
 	"log"
 	"os"
@@ -113,13 +113,33 @@ func handleReply(bot *bot.Bot, update tgbotapi.Update) {
 	log.Println("Handle reply")
 
 	chatID := update.Message.Chat.ID
-	err := handlers2.HandleReply(bot, update)
-	if err != nil {
-		log.Println(err)
+	userID := update.Message.From.ID
 
-		message := tgbotapi.NewMessage(chatID, err.Error())
-		message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true}
-		message.ParseMode = tgbotapi.ModeMarkdown
-		bot.SendWithEH(message)
+	handler := handlers.GetWaitingHandler(usr.UserId(userID))
+	if handler == nil {
+		return
+	} else {
+		err := handler.HandleReply(bot, update)
+		if err != nil {
+			log.Println(err)
+
+			message := tgbotapi.NewMessage(chatID, err.Error())
+			message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true}
+			message.ParseMode = tgbotapi.ModeMarkdown
+			bot.SendWithEH(message)
+			return
+		}
+		handlers.RemoveWaitingHandler(usr.UserId(userID))
 	}
+
+	//
+	//err := handlers2.HandleReply(bot, update)
+	//if err != nil {
+	//	log.Println(err)
+	//
+	//	message := tgbotapi.NewMessage(chatID, err.Error())
+	//	message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true}
+	//	message.ParseMode = tgbotapi.ModeMarkdown
+	//	bot.SendWithEH(message)
+	//}
 }
