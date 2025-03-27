@@ -7,7 +7,6 @@ import (
 	"happy-birthday-bot/handlers"
 	"happy-birthday-bot/reminder"
 	"happy-birthday-bot/restrictions"
-	"happy-birthday-bot/usr"
 	"io"
 	"log"
 	"os"
@@ -142,10 +141,7 @@ func handleReply(bot *bot.Bot, update tgbotapi.Update) {
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
 
-	handler := handlers.GetWaitingForReplyHandler(usr.UserId(userID))
-	if handler == nil {
-		return
-	} else {
+	if handler, ok := handlers.WaitingForReplyHandlers.Get(userID); ok {
 		err := handler.HandleReply(bot, update)
 		if err != nil {
 			log.Println("Error in reply:", err)
@@ -153,7 +149,7 @@ func handleReply(bot *bot.Bot, update tgbotapi.Update) {
 			bot.SendWithForceReply(chatID, err.Error())
 			return
 		}
-		handlers.RemoveWaitingForReplyHandler(usr.UserId(userID))
+		handlers.WaitingForReplyHandlers.Delete(userID)
 	}
 }
 
@@ -168,10 +164,7 @@ func handleCallback(bot *bot.Bot, update tgbotapi.Update) {
 
 	removeButtonAnimation(bot, update)
 
-	callbackElement := handlers.GetWaitingForCallbackHandler(messageId)
-	if callbackElement == nil {
-		log.Println("Handler for callback is not registered")
-	} else {
+	if callbackElement, ok := handlers.WaitingForCallbackHandlers.Get(messageId); ok {
 		if callbackElement.UserId != userID {
 			bot.Send(chatId, "Это не для тебя кнопки, не трогай!")
 			return
@@ -182,7 +175,7 @@ func handleCallback(bot *bot.Bot, update tgbotapi.Update) {
 				return
 			}
 
-			handlers.RemoveWaitingForCallbackHandler(messageId)
+			handlers.WaitingForCallbackHandlers.Delete(messageId)
 		}
 	}
 	removeInlineButtons(bot, update)

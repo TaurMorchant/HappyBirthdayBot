@@ -22,7 +22,7 @@ func (h WishlistHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 		if len(user.Wishlist) == 0 {
 			msg := "Похоже ты еще не составил свой вишлист! Самое время это сделать! Напиши в ответ на это сообщение, что бы ты хотел получить в подарок?"
 			bot.SendWithForceReply(chatID, msg)
-			WaitForReply(usr.UserId(userID), h)
+			WaitingForReplyHandlers.Add(userID, h)
 		} else {
 			msg := fmt.Sprintf("Вот так выглядит твой вишлист:\n\n```\n%s\n```\n"+
 				"Ты хочешь его поменять?", user.Wishlist)
@@ -34,7 +34,7 @@ func (h WishlistHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 				),
 			)
 			sentMessage := bot.SendWithKeyboard(chatID, msg, inlineKeyboard)
-			WaitForCallback(sentMessage.MessageID, userID, h)
+			WaitingForCallbackHandlers.Add(sentMessage.MessageID, CallbackElement{UserId: userID, Handler: h})
 		}
 	} else {
 		bot.Send(chatID, "Кажется ты еще не зарегистрирован в программе! Зарегистрируйся при помощи команды `/join`!")
@@ -67,7 +67,7 @@ func (h WishlistHandler) HandleCallback(bot *bot.Bot, update tgbotapi.Update) er
 	if update.CallbackQuery.Data == okButton {
 		msg := "Напиши в ответ на это сообщение, что бы ты хотел получить в подарок?"
 		bot.SendWithForceReply(chatID, msg)
-		WaitForReply(usr.UserId(userID), h)
+		WaitingForReplyHandlers.Add(userID, h)
 	} else if update.CallbackQuery.Data == cancelButton {
 		bot.Send(chatID, "Океюшки")
 	} else {

@@ -32,9 +32,9 @@ func (h ExitHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 
 		sentMessage := bot.SendWithKeyboard(chatID, msg, inlineKeyboard)
 
-		//bot.SendWithForceReply(chatID, msg)
-
-		WaitForCallback(sentMessage.MessageID, userID, h)
+		WaitingForCallbackHandlers.Add(sentMessage.MessageID, CallbackElement{UserId: userID, Handler: h})
+		//
+		//WaitForCallback(sentMessage.MessageID, userID, h)
 	} else {
 		bot.Send(chatID, "Слыш, ты и так не в программе!")
 	}
