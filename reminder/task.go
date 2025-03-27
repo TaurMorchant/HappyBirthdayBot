@@ -1,11 +1,22 @@
 package reminder
 
 import (
+	"fmt"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/magiconair/properties"
 	"github.com/robfig/cron/v3"
 	"happy-birthday-bot/bot"
+	"happy-birthday-bot/handlers"
 	"happy-birthday-bot/sheets"
+	"happy-birthday-bot/usr"
 	"log"
 )
+
+var birthdayChats *properties.Properties
+
+func init() {
+	birthdayChats = properties.MustLoadFile("birthdayChats.properties", properties.UTF8)
+}
 
 func StartReminderTask(bot *bot.Bot) {
 	c := cron.New(cron.WithSeconds())
@@ -22,24 +33,21 @@ func StartReminderTask(bot *bot.Bot) {
 func isBirthdayComingUp(bot *bot.Bot) {
 	users := sheets.Read()
 	isUpdateNeeded := false
-	for _, user := range *users.GetAllUsers() {
+	for _, user := range users.GetAllUsers() {
 		if user.DaysBeforeBirthday() == 365 && !user.BirthdayGreetings {
-			//поздравить с др
-			log.Println("Поздравить с ДР ", user.Name)
-			user.BirthdayGreetings = true
+			handleBirthday(bot, user)
 			isUpdateNeeded = true
+			continue
 		}
-		if user.DaysBeforeBirthday() <= 15 && !user.Reminder15days {
-			//напомнить о 15 днях
-			log.Printf("Напоминаю, до ДР %s осталось %d дней", user.Name, user.DaysBeforeBirthday())
-			user.Reminder15days = true
+		if user.DaysBeforeBirthday() <= 14 && !user.Reminder15days {
+			handle15Days(bot, user)
 			isUpdateNeeded = true
+			continue
 		}
 		if user.DaysBeforeBirthday() <= 30 && !user.Reminder30days {
-			//напомнить о 30 днях
-			log.Printf("Эй, до ДР %s осталось %d дней", user.Name, user.DaysBeforeBirthday())
-			user.Reminder30days = true
+			handle30Days(bot, user)
 			isUpdateNeeded = true
+			continue
 		}
 	}
 	log.Println("isUpdateNeeded = ", isUpdateNeeded)
@@ -47,3 +55,40 @@ func isBirthdayComingUp(bot *bot.Bot) {
 		sheets.Write(&users)
 	}
 }
+
+func handleBirthday(bot *bot.Bot, user *usr.User) {
+	msg := fmt.Sprintf("Ура! Сегодня день рождения отмечает %s!", user.Name)
+	bot.SendWithEH(tgbotapi.NewMessage(handlers.MAIN_CHAT_ID, msg))
+	user.BirthdayGreetings = true
+	user.Reminder15days = true
+	user.Reminder30days = true
+}
+
+func handle15Days(bot *bot.Bot, user *usr.User) {
+	chatLink := birthdayChats.GetString(fmt.Sprintf("%d", user.Id), "")
+	msg := fmt.Sprintf("Хочу напомнить, что и двух недель не осталось до момента, когда родится `%s`!", user.Name)
+	if chatLink != "" {
+		msg += fmt.Sprintf("\n\nЕсли ты всё ещё не присоединился к обсуждению подарка - самое время: %s", chatLink)
+	}
+	message := tgbotapi.NewMessage(handlers.MAIN_CHAT_ID, msg)
+	message.ParseMode = tgbotapi.ModeMarkdown
+	bot.SendWithEH(message)
+	user.Reminder15days = true
+	user.Reminder30days = true
+}
+
+func handle30Days(bot *bot.Bot, user *usr.User) {
+	chatLink := birthdayChats.GetString(fmt.Sprintf("%d", user.Id), "")
+	msg := fmt.Sprintf("Псс, ребята! Уже меньше, чем через месяц, `%s` отмечает свой день рождения! Самое время подумать о подарке!", user.Name)
+	if chatLink != "" {
+		msg += fmt.Sprintf("\n\nЕсли хочешь обсудить, что подарим, залетай в чат: %s", chatLink)
+	} else {
+		msg += fmt.Sprintf("\n\nНо кажется @morchant ещё не завел чатик для обсуждения! Ей, пните его кто-нибудь!")
+	}
+	message := tgbotapi.NewMessage(handlers.MAIN_CHAT_ID, msg)
+	message.ParseMode = tgbotapi.ModeMarkdown
+	bot.SendWithEH(message)
+	user.Reminder30days = true
+}
+
+//todo сделать команду пнутия, которая будет работать только через мою личку

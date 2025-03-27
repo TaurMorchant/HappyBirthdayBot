@@ -69,8 +69,8 @@ func Read() usr.Users {
 func Write(users *usr.Users) {
 	startTime := time.Now().Unix()
 	var values [][]interface{}
-	for _, user := range *users.GetAllUsers() {
-		userRow := []interface{}{user.Id, user.Name, date.FormatDate(user.Birthday().Time)}
+	for _, user := range users.GetAllUsers() {
+		userRow := prepareUserRow(user)
 		values = append(values, userRow)
 	}
 
@@ -136,4 +136,8 @@ func readRowValue(row []interface{}, i int) string {
 		return ""
 	}
 	return row[i].(string)
+}
+
+func prepareUserRow(user *usr.User) []interface{} {
+	return []interface{}{user.Id, user.Name, date.FormatDate(user.Birthday().Time), user.Reminder30days, user.Reminder15days, user.BirthdayGreetings}
 }

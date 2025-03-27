@@ -6,24 +6,24 @@ import (
 )
 
 type Users struct {
-	users []User
+	users []*User
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 
-func (u *Users) GetAllUsers() *[]User {
-	return &u.users
+func (u *Users) GetAllUsers() []*User {
+	return u.users
 }
 
 func (u *Users) Add(user User) {
-	u.users = append(u.users, user)
+	u.users = append(u.users, &user)
 	u.sort()
 }
 
 func (u *Users) Get(id UserId) (*User, bool) {
 	for _, user := range u.users {
 		if user.Id == id {
-			return &user, true
+			return user, true
 		}
 	}
 	return nil, false
@@ -47,17 +47,17 @@ func (u *Users) GetMaxNameLength() int {
 	return result
 }
 
-func (u *Users) GetNextBirthdayUsers(n int) ([]User, error) {
-	if n > len(*u.GetAllUsers()) {
-		n = len(*u.GetAllUsers())
+func (u *Users) GetNextBirthdayUsers(n int) ([]*User, error) {
+	if n > len(u.GetAllUsers()) {
+		n = len(u.GetAllUsers())
 	}
 
-	var result []User
+	var result []*User
 
 	sortedUsers := u.sortByDaysBeforeBirthday()
 
 	for i := 0; i < n; i++ {
-		user := (*sortedUsers.GetAllUsers())[i]
+		user := (sortedUsers.GetAllUsers())[i]
 		result = append(result, user)
 	}
 
@@ -74,7 +74,7 @@ func (u *Users) sort() {
 
 func (u *Users) sortByDaysBeforeBirthday() *Users {
 	result := Users{}
-	usersClone := make([]User, len(u.users))
+	usersClone := make([]*User, len(u.users))
 	copy(usersClone, u.users)
 	result.users = usersClone
 

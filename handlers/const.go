@@ -8,3 +8,5 @@ const (
 	Join      = "join"
 	Exit      = "exit"
 )
+
+const MAIN_CHAT_ID = 287959887

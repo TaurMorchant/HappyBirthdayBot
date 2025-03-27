@@ -16,7 +16,6 @@ type IHandler interface {
 }
 
 var Handlers = map[string]IHandler{
-	Test:      &TestHandler{},
 	Start:     &StartHandler{},
 	Join:      &JoinHandler{},
 	Exit:      &ExitHandler{},

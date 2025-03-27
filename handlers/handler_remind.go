@@ -25,7 +25,7 @@ func (h RemindHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 
 	msg := "Ближайшие именинники:\n```\n"
 	for _, user := range nextBirthdayUsers {
-		msg += formatterStr(&user, maxNameLength) + "\n"
+		msg += formatterStr(user, maxNameLength) + "\n"
 	}
 	msg += "```"
 	message := tgbotapi.NewMessage(update.Message.Chat.ID, msg)

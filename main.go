@@ -63,9 +63,8 @@ func registerBot() *bot.Bot {
 	//bot.Debug = true
 
 	commands := []tgbotapi.BotCommand{
-		{Command: handlers.Test, Description: "test"},
-		{Command: handlers.List, Description: "Посмотреть всех в программе"},
-		{Command: handlers.Join, Description: "Присоединиться к прогррамме"},
+		{Command: handlers.List, Description: "Все дни рождения"},
+		{Command: handlers.Join, Description: "Присоединиться к программе"},
 		{Command: handlers.Exit, Description: "Выйти из программы"},
 		{Command: handlers.Reminders, Description: "Ближайшие дни рождения"},
 	}
