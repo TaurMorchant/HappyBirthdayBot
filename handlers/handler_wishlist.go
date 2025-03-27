@@ -1,8 +1,13 @@
 package handlers
 
 import (
+	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"happy-birthday-bot/bot"
+	"happy-birthday-bot/sheets"
+	"happy-birthday-bot/usr"
+	"log"
+	"strings"
 )
 
 type WishlistHandler struct {
@@ -10,12 +15,51 @@ type WishlistHandler struct {
 
 func (h WishlistHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
+	userID := update.Message.From.ID
 
-	bot.SendWithEH(tgbotapi.NewMessage(chatID, "Wishlist placeholder"))
+	users := sheets.Read()
+
+	if user, ok := users.Get(usr.UserId(userID)); ok {
+		if len(user.Wishlist) == 0 {
+			msg := "Похоже ты еще не составил свой вишлист! Самое время это сделать! Напиши в ответ на это сообщение, что бы ты хотел получить в подарок?"
+			message := tgbotapi.NewMessage(chatID, msg)
+			message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true}
+			message.ParseMode = tgbotapi.ModeMarkdown
+			bot.SendWithEH(message)
+			WaitForReply(usr.UserId(userID), h)
+		} else {
+			msg := fmt.Sprintf("Вот так выглядит твой вишлист:\n\n```\n%s\n```\n"+
+				"Если хочешь его поменять, отправь мне новый вишлист в ответ на это сообщение. Если не хочешь - ответь `Не хочу`", user.Wishlist)
+			message := tgbotapi.NewMessage(chatID, msg)
+			message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true}
+			message.ParseMode = tgbotapi.ModeMarkdown
+			bot.SendWithEH(message)
+			WaitForReply(usr.UserId(userID), h)
+		}
+	} else {
+		message := tgbotapi.NewMessage(chatID, "Кажется ты еще не зарегистрирован в программе! Зарегистрируйся при помощи команды `/join`!")
+		message.ParseMode = tgbotapi.ModeMarkdown
+		bot.SendWithEH(message)
+	}
 
 	return nil
 }
 
-func (h WishlistHandler) HandleReply(*bot.Bot, tgbotapi.Update) error {
+func (h WishlistHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
+	chatID := update.Message.Chat.ID
+	userID := update.Message.From.ID
+
+	if strings.EqualFold(update.Message.Text, "не хочу") {
+		bot.SendWithEH(tgbotapi.NewMessage(chatID, "Океюшки"))
+	} else {
+		users := sheets.Read()
+		if user, ok := users.Get(usr.UserId(userID)); ok {
+			user.Wishlist = update.Message.Text
+			sheets.Write(&users)
+			bot.SendWithEH(tgbotapi.NewMessage(chatID, "Вишлист обновлён!"))
+		} else {
+			log.Panicf("User with ID %d not found", usr.UserId(userID))
+		}
+	}
 	return nil
 }

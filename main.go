@@ -119,12 +119,8 @@ func handleUpdate(bot *bot.Bot, update tgbotapi.Update) {
 }
 
 func handlePanic(bot *bot.Bot, update tgbotapi.Update) {
-	p := recover()
-	if p == nil {
-		return
-	}
-	if err, ok := p.(error); ok {
-		log.Println("Panic: ", err)
+	if p := recover(); p != nil {
+		log.Println("[PANIC] Panic was catch: ", p)
 		fmt.Println(string(debug.Stack()))
 		message := fmt.Sprintf("Случилась какая-то неведомая фигня, напиши @morchant об этом, пожалуйста")
 		bot.SendWithEH(tgbotapi.NewMessage(update.Message.Chat.ID, message))

@@ -20,7 +20,7 @@ func init() {
 
 func StartReminderTask(bot *bot.Bot) {
 	c := cron.New(cron.WithSeconds())
-	_, err := c.AddFunc("*/10 * * * * *", func() { // Каждые 10 секунд
+	_, err := c.AddFunc("* * 9 * * *", func() {
 		isBirthdayComingUp(bot)
 	})
 	if err != nil {

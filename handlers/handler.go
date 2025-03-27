@@ -21,6 +21,7 @@ var Handlers = map[string]IHandler{
 	Exit:      &ExitHandler{},
 	List:      &ListHandler{},
 	Reminders: &RemindHandler{},
+	Wishlist:  &WishlistHandler{},
 }
 
 var waitingHandlers = cache.New(30*time.Second, 1*time.Minute)

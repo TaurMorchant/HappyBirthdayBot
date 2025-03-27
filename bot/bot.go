@@ -10,11 +10,12 @@ type Bot struct {
 }
 
 // todo принимать чат и текст, добавлять markdown
-func (b *Bot) SendWithEH(c tgbotapi.Chattable) tgbotapi.Message {
+func (b *Bot) SendWithEH(c tgbotapi.Chattable) *tgbotapi.Message {
 	mess, err := b.Send(c)
 	if err != nil {
-		log.Println("[ERROR] Cannot send message: ", err)
+		log.Panicln("[ERROR] Cannot send message: ", err)
+		return nil
 	}
 	log.Printf("Message [%s] sent in chat %d", mess.Text, mess.Chat.ID)
-	return mess
+	return &mess
 }
