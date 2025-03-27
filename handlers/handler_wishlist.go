@@ -7,7 +7,6 @@ import (
 	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
 	"log"
-	"strings"
 )
 
 type WishlistHandler struct {
@@ -26,9 +25,16 @@ func (h WishlistHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 			WaitForReply(usr.UserId(userID), h)
 		} else {
 			msg := fmt.Sprintf("Вот так выглядит твой вишлист:\n\n```\n%s\n```\n"+
-				"Если хочешь его поменять, отправь мне новый вишлист в ответ на это сообщение. Если не хочешь - ответь '`Не хочу`'", user.Wishlist)
-			bot.SendWithForceReply(chatID, msg)
-			WaitForReply(usr.UserId(userID), h)
+				"Ты хочешь его поменять?", user.Wishlist)
+
+			inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
+				tgbotapi.NewInlineKeyboardRow(
+					tgbotapi.NewInlineKeyboardButtonData("Хочу", okButton),
+					tgbotapi.NewInlineKeyboardButtonData("Не, все норм", cancelButton),
+				),
+			)
+			sentMessage := bot.SendWithKeyboard(chatID, msg, inlineKeyboard)
+			WaitForCallback(sentMessage.MessageID, userID, h)
 		}
 	} else {
 		bot.Send(chatID, "Кажется ты еще не зарегистрирован в программе! Зарегистрируйся при помощи команды `/join`!")
@@ -41,17 +47,32 @@ func (h WishlistHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
 
-	if strings.EqualFold(update.Message.Text, "не хочу") {
+	users := sheets.Read()
+	if user, ok := users.Get(usr.UserId(userID)); ok {
+		user.Wishlist = update.Message.Text
+		sheets.Write(&users)
+		//todo картинка с котиком
+		bot.Send(chatID, "Вжух, вишлист обновлён!")
+	} else {
+		log.Panicf("User with ID %d not found", usr.UserId(userID))
+	}
+	return nil
+}
+
+func (h WishlistHandler) HandleCallback(bot *bot.Bot, update tgbotapi.Update) error {
+	log.Println("Handle callback for WishlistHandler")
+	chatID := update.CallbackQuery.Message.Chat.ID
+	userID := update.CallbackQuery.From.ID
+
+	if update.CallbackQuery.Data == okButton {
+		msg := "Напиши в ответ на это сообщение, что бы ты хотел получить в подарок?"
+		bot.SendWithForceReply(chatID, msg)
+		WaitForReply(usr.UserId(userID), h)
+	} else if update.CallbackQuery.Data == cancelButton {
 		bot.Send(chatID, "Океюшки")
 	} else {
-		users := sheets.Read()
-		if user, ok := users.Get(usr.UserId(userID)); ok {
-			user.Wishlist = update.Message.Text
-			sheets.Write(&users)
-			bot.Send(chatID, "Вишлист обновлён!")
-		} else {
-			log.Panicf("User with ID %d not found", usr.UserId(userID))
-		}
+		bot.Send(chatID, "Ты откуда вообще взял эту кнопку, тут ее не должно быть!")
 	}
+
 	return nil
 }

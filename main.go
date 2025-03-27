@@ -83,39 +83,48 @@ func registerBot() *bot.Bot {
 func handleUpdate(bot *bot.Bot, update tgbotapi.Update) {
 	defer handlePanic(bot, update)
 
-	if update.Message == nil {
+	if update.CallbackQuery != nil {
+		log.Println("[TRACE] update.CallbackQuery.From.ID = ", update.CallbackQuery.From.ID)
+		log.Println("[TRACE] update.CallbackQuery.Message.MessageID = ", update.CallbackQuery.Message.MessageID)
+		log.Println("[TRACE] update.CallbackQuery.From.ID = ", update.CallbackQuery.From.ID)
+		handleCallback(bot, update)
 		return
+	} else if update.Message != nil {
+		log.Println("[TRACE] update.Message.From.ID = ", update.Message.From.ID)
+		log.Println("[TRACE] update.Message.Chat.ID = ", update.Message.Chat.ID)
+
+		if notRestricted(bot, update) {
+			log.Printf("Принято сообщение: %s", update.Message.Text)
+
+			if update.Message.IsCommand() {
+				handler, ok := handlers.Handlers[update.Message.Command()]
+				if !ok {
+					bot.Send(update.Message.Chat.ID, fmt.Sprintf("Я не знаю команду '%s', откуда ты ее взял?", update.Message.Command()))
+					return
+				}
+				err := handler.Handle(bot, update)
+				if err != nil {
+					panic(err)
+				}
+			} else if update.Message.ReplyToMessage != nil && update.Message.ReplyToMessage.From.ID == BotID {
+				handleReply(bot, update)
+			}
+		}
 	}
+}
 
-	log.Println("update.Message.From.ID", update.Message.From.ID)
-	log.Println("update.Message.Chat.ID", update.Message.Chat.ID)
-
+func notRestricted(bot *bot.Bot, update tgbotapi.Update) bool {
 	if !restrictions.IsUserAllowed(update.Message.From.ID) {
 		bot.Send(update.Message.Chat.ID, fmt.Sprintf("Прости %s, мне запрещено с тобой общаться!", update.Message.From.UserName))
-		return
+		return false
 	}
 
 	if !restrictions.IsChatAllowed(update.Message.Chat.ID) {
 		bot.Send(update.Message.Chat.ID, fmt.Sprintf("Прости, мне запрещено общаться в этом чате!"))
-		return
+		return false
 	}
 
-	log.Printf("Принято сообщение: %s", update.Message.Text)
-
-	if update.Message.ReplyToMessage != nil && update.Message.ReplyToMessage.From.ID == BotID {
-		handleReply(bot, update)
-	} else if update.Message.IsCommand() {
-		handler, ok := handlers.Handlers[update.Message.Command()]
-		if !ok {
-			bot.Send(update.Message.Chat.ID, fmt.Sprintf("Я не знаю команду '%s', откуда ты ее взял?", update.Message.Command()))
-			return
-		}
-		err := handler.Handle(bot, update)
-		if err != nil {
-			message := fmt.Sprintf("Случилась какая-то неведомая фигня, напиши @morchant об этом, пожалуйста")
-			bot.Send(update.Message.Chat.ID, message)
-		}
-	}
+	return true
 }
 
 func handlePanic(bot *bot.Bot, update tgbotapi.Update) {
@@ -133,7 +142,7 @@ func handleReply(bot *bot.Bot, update tgbotapi.Update) {
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
 
-	handler := handlers.GetWaitingHandler(usr.UserId(userID))
+	handler := handlers.GetWaitingForReplyHandler(usr.UserId(userID))
 	if handler == nil {
 		return
 	} else {
@@ -144,6 +153,57 @@ func handleReply(bot *bot.Bot, update tgbotapi.Update) {
 			bot.SendWithForceReply(chatID, err.Error())
 			return
 		}
-		handlers.RemoveWaitingHandler(usr.UserId(userID))
+		handlers.RemoveWaitingForReplyHandler(usr.UserId(userID))
+	}
+}
+
+func handleCallback(bot *bot.Bot, update tgbotapi.Update) {
+	log.Println("Handle callback")
+
+	chatId := update.CallbackQuery.Message.Chat.ID
+	messageId := update.CallbackQuery.Message.MessageID
+	userID := update.CallbackQuery.From.ID
+
+	log.Println("userID = ", userID)
+
+	removeButtonAnimation(bot, update)
+
+	callbackElement := handlers.GetWaitingForCallbackHandler(messageId)
+	if callbackElement == nil {
+		log.Println("Handler for callback is not registered")
+	} else {
+		if callbackElement.UserId != userID {
+			bot.Send(chatId, "Это не для тебя кнопки, не трогай!")
+			return
+		} else {
+			err := callbackElement.Handler.HandleCallback(bot, update)
+			if err != nil {
+				log.Panic("Error in callback:", err)
+				return
+			}
+
+			handlers.RemoveWaitingForCallbackHandler(messageId)
+		}
+	}
+	removeInlineButtons(bot, update)
+}
+
+func removeButtonAnimation(bot *bot.Bot, update tgbotapi.Update) {
+	callbackCfg := tgbotapi.NewCallback(update.CallbackQuery.ID, "")
+	if _, err := bot.Request(callbackCfg); err != nil {
+		log.Panic("Ошибка при обработке callback:", err)
+	}
+}
+
+// todo сейчас при удалении кнопок исчезает и форматирование
+func removeInlineButtons(bot *bot.Bot, update tgbotapi.Update) {
+	editMsg := tgbotapi.NewEditMessageReplyMarkup(
+		update.CallbackQuery.Message.Chat.ID,
+		update.CallbackQuery.Message.MessageID,
+		tgbotapi.InlineKeyboardMarkup{InlineKeyboard: [][]tgbotapi.InlineKeyboardButton{}},
+	)
+
+	if _, err := bot.BotAPI.Send(editMsg); err != nil {
+		log.Panic("Ошибка при редактировании сообщения:", err)
 	}
 }

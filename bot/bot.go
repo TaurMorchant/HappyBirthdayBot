@@ -20,6 +20,12 @@ func (b *Bot) SendWithForceReply(chatId int64, str string) *tgbotapi.Message {
 	return b.sendInternal(message)
 }
 
+func (b *Bot) SendWithKeyboard(chatId int64, str string, keyboard tgbotapi.InlineKeyboardMarkup) *tgbotapi.Message {
+	message := prepareMessage(chatId, str)
+	message.ReplyMarkup = keyboard
+	return b.sendInternal(message)
+}
+
 //----------------------------------------------------------------------------------------
 
 func prepareMessage(chatId int64, str string) *tgbotapi.MessageConfig {

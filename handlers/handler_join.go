@@ -27,7 +27,7 @@ func (h JoinHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	msg := "Отлично! Ответь на это сообщение вот так:\n\n`<Твое имя>, <дата рождения в формате DD.MM.YYYY>`\n\nНапример:\n\n`Вася Пупкин, 25.03.1990`"
 	bot.SendWithForceReply(chatID, msg)
 
-	WaitForReply(usr.UserId(userID), h)
+	WaitForReply(usr.UserId(userID), &h)
 	return nil
 }
 
@@ -54,5 +54,9 @@ func (h JoinHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
 
 	bot.Send(chatID, "Поздравляю, теперь тебя отхеппибёздят!")
 
+	return nil
+}
+
+func (h JoinHandler) HandleCallback(*bot.Bot, tgbotapi.Update) error {
 	return nil
 }

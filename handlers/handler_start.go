@@ -19,3 +19,7 @@ func (h StartHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 func (h StartHandler) HandleReply(*bot.Bot, tgbotapi.Update) error {
 	return nil
 }
+
+func (h StartHandler) HandleCallback(*bot.Bot, tgbotapi.Update) error {
+	return nil
+}

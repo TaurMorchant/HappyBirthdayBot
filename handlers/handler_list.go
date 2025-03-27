@@ -33,3 +33,7 @@ func (h ListHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 func (h ListHandler) HandleReply(*bot.Bot, tgbotapi.Update) error {
 	return nil
 }
+
+func (h ListHandler) HandleCallback(*bot.Bot, tgbotapi.Update) error {
+	return nil
+}

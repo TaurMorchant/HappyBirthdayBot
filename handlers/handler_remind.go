@@ -65,3 +65,7 @@ func getDaysWord(n int) string {
 func (h RemindHandler) HandleReply(*bot.Bot, tgbotapi.Update) error {
 	return nil
 }
+
+func (h RemindHandler) HandleCallback(*bot.Bot, tgbotapi.Update) error {
+	return nil
+}
