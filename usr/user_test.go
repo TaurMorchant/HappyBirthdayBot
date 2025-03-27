@@ -23,7 +23,7 @@ func Test_GetDaysBeforeBirthday_1(t *testing.T) {
 	user := User{}
 	user.SetBirthday(userDate, currentDate)
 
-	assert.Equal(t, 2, user.GetDaysBeforeBirthday())
+	assert.Equal(t, 2, user.DaysBeforeBirthday())
 }
 
 func Test_GetDaysBeforeBirthday_2(t *testing.T) {
@@ -33,7 +33,7 @@ func Test_GetDaysBeforeBirthday_2(t *testing.T) {
 	user := User{}
 	user.SetBirthday(userDate, currentDate)
 
-	assert.Equal(t, 30, user.GetDaysBeforeBirthday())
+	assert.Equal(t, 30, user.DaysBeforeBirthday())
 }
 
 func Test_GetDaysBeforeBirthday_3(t *testing.T) {
@@ -43,7 +43,7 @@ func Test_GetDaysBeforeBirthday_3(t *testing.T) {
 	user := User{}
 	user.SetBirthday(userDate, currentDate)
 
-	assert.Equal(t, 30, user.GetDaysBeforeBirthday())
+	assert.Equal(t, 30, user.DaysBeforeBirthday())
 }
 
 func Test_GetDaysBeforeBirthday_4(t *testing.T) {
@@ -53,7 +53,7 @@ func Test_GetDaysBeforeBirthday_4(t *testing.T) {
 	user := User{}
 	user.SetBirthday(userDate, currentDate)
 
-	assert.Equal(t, 1, user.GetDaysBeforeBirthday())
+	assert.Equal(t, 1, user.DaysBeforeBirthday())
 }
 
 func Test_GetDaysBeforeBirthday_5(t *testing.T) {
@@ -63,7 +63,7 @@ func Test_GetDaysBeforeBirthday_5(t *testing.T) {
 	user := User{}
 	user.SetBirthday(userDate, currentDate)
 
-	assert.Equal(t, 1, user.GetDaysBeforeBirthday())
+	assert.Equal(t, 1, user.DaysBeforeBirthday())
 }
 
 func Test_GetDaysBeforeBirthday_6(t *testing.T) {
@@ -73,7 +73,7 @@ func Test_GetDaysBeforeBirthday_6(t *testing.T) {
 	user := User{}
 	user.SetBirthday(userDate, currentDate)
 
-	assert.Equal(t, 365, user.GetDaysBeforeBirthday())
+	assert.Equal(t, 365, user.DaysBeforeBirthday())
 }
 
 func Test_FormattedString_1(t *testing.T) {

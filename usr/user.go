@@ -13,6 +13,9 @@ type User struct {
 	Name               string
 	birthday           date.Birthday
 	daysBeforeBirthday int
+	Reminder30days     bool
+	Reminder15days     bool
+	BirthdayGreetings  bool
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -23,20 +26,20 @@ func (u *User) FormattedString(maxNameLength int) string {
 
 func (u *User) SetBirthday(t time.Time, timeNow time.Time) {
 	u.birthday = date.ToBirthday(t)
-	u.daysBeforeBirthday = u.getDaysBeforeBirthday(timeNow)
+	u.daysBeforeBirthday = u.calculateDaysBeforeBirthday(timeNow)
 }
 
-func (u *User) GetBirthday() date.Birthday {
+func (u *User) Birthday() date.Birthday {
 	return u.birthday
 }
 
-func (u *User) GetDaysBeforeBirthday() int {
+func (u *User) DaysBeforeBirthday() int {
 	return u.daysBeforeBirthday
 }
 
 //--------------------------------------------------------------
 
-func (u *User) getDaysBeforeBirthday(timeNow time.Time) int {
+func (u *User) calculateDaysBeforeBirthday(timeNow time.Time) int {
 	timeNow = time.Date(u.birthday.Year(), timeNow.Month(), timeNow.Day(), 0, 0, 0, 0, time.UTC)
 
 	duration := u.birthday.Sub(timeNow)

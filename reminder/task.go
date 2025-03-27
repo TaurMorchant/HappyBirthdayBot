@@ -1,13 +1,10 @@
 package reminder
 
 import (
-	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/robfig/cron/v3"
 	"happy-birthday-bot/bot"
 	"happy-birthday-bot/sheets"
 	"log"
-	"time"
 )
 
 func StartReminderTask(bot *bot.Bot) {
@@ -23,18 +20,30 @@ func StartReminderTask(bot *bot.Bot) {
 }
 
 func isBirthdayComingUp(bot *bot.Bot) {
-	timeNow := time.Now()
 	users := sheets.Read()
-	for _, user := range users.GetAllUsers() {
-		if user.GetBirthday().Before(timeNow) {
-			continue
+	isUpdateNeeded := false
+	for _, user := range *users.GetAllUsers() {
+		if user.DaysBeforeBirthday() == 365 && !user.BirthdayGreetings {
+			//поздравить с др
+			log.Println("Поздравить с ДР ", user.Name)
+			user.BirthdayGreetings = true
+			isUpdateNeeded = true
 		}
-		days := user.GetDaysBeforeBirthday()
-		log.Println("days = ", days)
-		if days < 30 {
-			message := tgbotapi.NewMessage(287959887, fmt.Sprintf("До дня рождения %s осталось меньше 30 дней!"))
-			bot.SendWithEH(message)
+		if user.DaysBeforeBirthday() <= 15 && !user.Reminder15days {
+			//напомнить о 15 днях
+			log.Printf("Напоминаю, до ДР %s осталось %d дней", user.Name, user.DaysBeforeBirthday())
+			user.Reminder15days = true
+			isUpdateNeeded = true
 		}
-		break
+		if user.DaysBeforeBirthday() <= 30 && !user.Reminder30days {
+			//напомнить о 30 днях
+			log.Printf("Эй, до ДР %s осталось %d дней", user.Name, user.DaysBeforeBirthday())
+			user.Reminder30days = true
+			isUpdateNeeded = true
+		}
+	}
+	log.Println("isUpdateNeeded = ", isUpdateNeeded)
+	if isUpdateNeeded {
+		sheets.Write(&users)
 	}
 }

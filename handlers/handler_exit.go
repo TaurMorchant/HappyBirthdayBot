@@ -5,6 +5,7 @@ import (
 	"happy-birthday-bot/bot"
 	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
+	"strings"
 )
 
 type ExitHandler struct {
@@ -34,10 +35,14 @@ func (h ExitHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
 
-	users := sheets.Read()
-	users.Delete(usr.UserId(userID))
-	sheets.Write(&users)
-	bot.SendWithEH(tgbotapi.NewMessage(chatID, "Все пучком, ты удален из программы!"))
+	if strings.EqualFold(update.Message.Text, "да") {
+		users := sheets.Read()
+		users.Delete(usr.UserId(userID))
+		sheets.Write(&users)
 
+		message := tgbotapi.NewMessage(chatID, "Все пучком, ты удален из программы!")
+		message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: false, Selective: false}
+		bot.SendWithEH(message)
+	}
 	return nil
 }

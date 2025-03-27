@@ -17,7 +17,7 @@ import (
 // Укажи путь к JSON-ключу
 const credentialsFile = "happybirthdaybot-454814-2dec5157295e.json"
 const spreadsheetID = "1fb5ssf4Mp8HZ9aAFAOox9byQGUHstRub_5ssOdDoNro"
-const readRange = "Data!A2:C30"
+const readRange = "Data!A2:F30"
 const writeRange = "Data!A2"
 
 var srv *sheets.Service
@@ -48,6 +48,7 @@ func init() {
 }
 
 func Read() usr.Users {
+	startTime := time.Now().Unix()
 	var result usr.Users
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetID, readRange).Do()
 	if err != nil {
@@ -60,14 +61,16 @@ func Read() usr.Users {
 			result.Add(*user)
 		}
 	}
+	diff := time.Now().Unix() - startTime
+	log.Println("Operation Read spent ", diff)
 	return result
 }
 
 func Write(users *usr.Users) {
-	// Данные для записи (диапазон "A1:B1")
+	startTime := time.Now().Unix()
 	var values [][]interface{}
-	for _, user := range users.GetAllUsers() {
-		userRow := []interface{}{user.Id, user.Name, date.FormatDate(user.GetBirthday().Time)}
+	for _, user := range *users.GetAllUsers() {
+		userRow := []interface{}{user.Id, user.Name, date.FormatDate(user.Birthday().Time)}
 		values = append(values, userRow)
 	}
 
@@ -84,6 +87,8 @@ func Write(users *usr.Users) {
 	if err != nil {
 		log.Fatalf("Ошибка при записи данных: %v", err)
 	}
+	diff := time.Now().Unix() - startTime
+	log.Println("Operation Write spent ", diff)
 }
 
 //-----------------------------
@@ -92,9 +97,12 @@ func readUser(row []interface{}) *usr.User {
 	if len(row) == 0 {
 		return nil
 	}
-	idStr := row[0].(string)
-	name := row[1].(string)
-	dateStr := row[2].(string)
+	idStr := readRowValue(row, 0)
+	name := readRowValue(row, 1)
+	dateStr := readRowValue(row, 2)
+	reminder30daysStr := readRowValue(row, 3)
+	reminder15daysStr := readRowValue(row, 4)
+	birthdayGreetingStr := readRowValue(row, 5)
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		log.Fatalf("Ошибка при чтении ID. row: %s. Err: %s", row, err)
@@ -103,9 +111,29 @@ func readUser(row []interface{}) *usr.User {
 	if err != nil {
 		log.Fatalf("Ошибка при чтении date. row: %s. Err: %s", row, err)
 	}
+	reminder30days := parseBool(reminder30daysStr)
+	reminder15days := parseBool(reminder15daysStr)
+	birthdayGreeting := parseBool(birthdayGreetingStr)
 
-	result := &usr.User{Id: usr.UserId(id), Name: name}
+	result := &usr.User{Id: usr.UserId(id), Name: name, Reminder30days: reminder30days, Reminder15days: reminder15days, BirthdayGreetings: birthdayGreeting}
 	result.SetBirthday(dateTime, time.Now())
 
+	log.Println("read user: ", result)
+
 	return result
+}
+
+func parseBool(str string) bool {
+	result, err := strconv.ParseBool(str)
+	if err != nil {
+		return false
+	}
+	return result
+}
+
+func readRowValue(row []interface{}, i int) string {
+	if i >= len(row) {
+		return ""
+	}
+	return row[i].(string)
 }

@@ -21,7 +21,7 @@ func (h ListHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 
 	maxNameLength := users.GetMaxNameLength()
 
-	for _, user := range usersSlice {
+	for _, user := range *usersSlice {
 		msg += user.FormattedString(maxNameLength) + "\n"
 	}
 	msg += "\n```"
@@ -32,6 +32,6 @@ func (h ListHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	return nil
 }
 
-func (h ListHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
+func (h ListHandler) HandleReply(*bot.Bot, tgbotapi.Update) error {
 	return nil
 }

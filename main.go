@@ -5,6 +5,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"happy-birthday-bot/bot"
 	"happy-birthday-bot/handlers"
+	"happy-birthday-bot/reminder"
 	"happy-birthday-bot/restrictions"
 	"happy-birthday-bot/usr"
 	"io"
@@ -18,7 +19,12 @@ const BotID = 7947290853
 
 func main() {
 	file := configureLogger()
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Println("Cannot close file!", err)
+		}
+	}(file)
 
 	hapBirBot := registerBot()
 
@@ -26,7 +32,7 @@ func main() {
 	u.Timeout = 10
 	updates := hapBirBot.GetUpdatesChan(u)
 
-	//startReminderTask(hapBirBot)
+	reminder.StartReminderTask(hapBirBot)
 
 	for update := range updates {
 		handleUpdate(hapBirBot, update)

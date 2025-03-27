@@ -30,7 +30,7 @@ func Test_sort(t *testing.T) {
 
 	expected := []User{user3, user1, user2}
 
-	assert.True(t, slices.Equal(expected, users.GetAllUsers()))
+	assert.True(t, slices.Equal(expected, *users.GetAllUsers()))
 }
 
 func Test_sortByDaysBeforeBirthday(t *testing.T) {
@@ -57,7 +57,7 @@ func Test_sortByDaysBeforeBirthday(t *testing.T) {
 
 	expected := []User{user3, user4, user5, user1, user2}
 
-	assert.True(t, slices.Equal(expected, result.GetAllUsers()))
+	assert.True(t, slices.Equal(expected, *result.GetAllUsers()))
 }
 
 func Test_GetNextBirthdayUsers_1(t *testing.T) {
