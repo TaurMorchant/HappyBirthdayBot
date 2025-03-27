@@ -73,7 +73,7 @@ func Test_GetDaysBeforeBirthday_6(t *testing.T) {
 	user := User{}
 	user.SetBirthday(userDate, currentDate)
 
-	assert.Equal(t, 365, user.DaysBeforeBirthday())
+	assert.Equal(t, 0, user.DaysBeforeBirthday())
 }
 
 func Test_FormattedString_1(t *testing.T) {

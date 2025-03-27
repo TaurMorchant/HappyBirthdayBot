@@ -15,9 +15,9 @@ import (
 )
 
 // Укажи путь к JSON-ключу
-const credentialsFile = "happybirthdaybot-454814-2dec5157295e.json"
+const credentialsFile = "C:\\go_modules\\happy_birthday_bot\\happybirthdaybot-454814-2dec5157295e.json"
 const spreadsheetID = "1fb5ssf4Mp8HZ9aAFAOox9byQGUHstRub_5ssOdDoNro"
-const readRange = "Data!A2:F30"
+const readRange = "Data!A2:G30"
 const writeRange = "Data!A2"
 
 var srv *sheets.Service
@@ -58,7 +58,7 @@ func Read() usr.Users {
 	for _, row := range resp.Values {
 		user := readUser(row)
 		if user != nil {
-			result.Add(*user)
+			result.Add(user)
 		}
 	}
 	diff := time.Now().Unix() - startTime
@@ -100,9 +100,10 @@ func readUser(row []interface{}) *usr.User {
 	idStr := readRowValue(row, 0)
 	name := readRowValue(row, 1)
 	dateStr := readRowValue(row, 2)
-	reminder30daysStr := readRowValue(row, 3)
-	reminder15daysStr := readRowValue(row, 4)
-	birthdayGreetingStr := readRowValue(row, 5)
+	wishlist := readRowValue(row, 3)
+	reminder30daysStr := readRowValue(row, 4)
+	reminder15daysStr := readRowValue(row, 5)
+	birthdayGreetingStr := readRowValue(row, 6)
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		log.Fatalf("Ошибка при чтении ID. row: %s. Err: %s", row, err)
@@ -115,7 +116,7 @@ func readUser(row []interface{}) *usr.User {
 	reminder15days := parseBool(reminder15daysStr)
 	birthdayGreeting := parseBool(birthdayGreetingStr)
 
-	result := &usr.User{Id: usr.UserId(id), Name: name, Reminder30days: reminder30days, Reminder15days: reminder15days, BirthdayGreetings: birthdayGreeting}
+	result := &usr.User{Id: usr.UserId(id), Name: name, Wishlist: wishlist, Reminder30days: reminder30days, Reminder15days: reminder15days, BirthdayGreetings: birthdayGreeting}
 	result.SetBirthday(dateTime, time.Now())
 
 	log.Println("read user: ", result)
@@ -139,5 +140,5 @@ func readRowValue(row []interface{}, i int) string {
 }
 
 func prepareUserRow(user *usr.User) []interface{} {
-	return []interface{}{user.Id, user.Name, date.FormatDate(user.Birthday().Time), user.Reminder30days, user.Reminder15days, user.BirthdayGreetings}
+	return []interface{}{user.Id, user.Name, date.FormatDate(user.Birthday().Time), user.Wishlist, user.Reminder30days, user.Reminder15days, user.BirthdayGreetings}
 }

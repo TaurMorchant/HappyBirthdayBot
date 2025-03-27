@@ -53,7 +53,7 @@ func (h JoinHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
 	user := usr.User{Id: usr.UserId(userID), Name: name}
 	user.SetBirthday(birthdate, time.Now())
 
-	users.Add(user)
+	users.Add(&user)
 	sheets.Write(&users)
 
 	bot.SendWithEH(tgbotapi.NewMessage(chatID, "Поздравляю, теперь тебя отхеппибёздят!"))

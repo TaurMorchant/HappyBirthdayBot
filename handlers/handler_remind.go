@@ -37,8 +37,31 @@ func (h RemindHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 
 // todo ограничить длиной самого длинного месяца
 func formatterStr(user *usr.User, maxNameLength int) string {
-	days := user.DaysBeforeBirthday()
-	return user.FormattedString(maxNameLength) + fmt.Sprintf(" (еще %d дней)", days)
+	return user.FormattedString(maxNameLength) + formatDaysLeft(user.DaysBeforeBirthday())
+}
+
+func formatDaysLeft(days int) string {
+	if days == 0 {
+		return " (уже сегодня! 😱)"
+	} else {
+		return fmt.Sprintf(" (еще %d %s)", days, getDaysWord(days))
+	}
+}
+
+func getDaysWord(n int) string {
+	if n%100 >= 11 && n%100 <= 19 {
+		return "дней"
+	}
+	switch n % 10 {
+	case 1:
+		return "день"
+	case 2, 3, 4:
+		return "дня"
+	case 5, 6, 7, 8, 9, 0:
+		return "дней"
+	default:
+		return ""
+	}
 }
 
 func (h RemindHandler) HandleReply(*bot.Bot, tgbotapi.Update) error {

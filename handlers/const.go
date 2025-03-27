@@ -1,12 +1,12 @@
 package handlers
 
 const (
-	Test      = "test"
 	Start     = "start"
 	List      = "list"
 	Reminders = "reminders"
 	Join      = "join"
+	Wishlist  = "wishlist"
 	Exit      = "exit"
 )
 
-const MAIN_CHAT_ID = 287959887
+const MainChatId = 287959887

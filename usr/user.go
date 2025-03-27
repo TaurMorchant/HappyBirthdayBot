@@ -13,6 +13,7 @@ type User struct {
 	Name               string
 	birthday           date.Birthday
 	daysBeforeBirthday int
+	Wishlist           string
 	Reminder30days     bool
 	Reminder15days     bool
 	BirthdayGreetings  bool
@@ -45,7 +46,7 @@ func (u *User) calculateDaysBeforeBirthday(timeNow time.Time) int {
 	duration := u.birthday.Sub(timeNow)
 	days := int(duration.Hours() / 24)
 
-	if days > 0 {
+	if days >= 0 {
 		return days
 	} else {
 		return 365 + days

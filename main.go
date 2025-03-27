@@ -65,8 +65,9 @@ func registerBot() *bot.Bot {
 	commands := []tgbotapi.BotCommand{
 		{Command: handlers.List, Description: "Все дни рождения"},
 		{Command: handlers.Join, Description: "Присоединиться к программе"},
-		{Command: handlers.Exit, Description: "Выйти из программы"},
+		{Command: handlers.Wishlist, Description: "Настроить свой Wishlist"},
 		{Command: handlers.Reminders, Description: "Ближайшие дни рождения"},
+		{Command: handlers.Exit, Description: "Выйти из программы"},
 	}
 
 	_, err = tgbot.Request(tgbotapi.SetMyCommandsConfig{Commands: commands})

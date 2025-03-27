@@ -15,8 +15,8 @@ func (u *Users) GetAllUsers() []*User {
 	return u.users
 }
 
-func (u *Users) Add(user User) {
-	u.users = append(u.users, &user)
+func (u *Users) Add(user *User) {
+	u.users = append(u.users, user)
 	u.sort()
 }
 

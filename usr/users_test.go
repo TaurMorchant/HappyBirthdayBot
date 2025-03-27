@@ -4,15 +4,16 @@ import (
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/exp/slices"
 	"happy-birthday-bot/date"
+	"log"
 	"testing"
 	"time"
 )
 
 func Test_GetMaxNameLength(t *testing.T) {
 	users := Users{}
-	users.Add(User{Name: "Qwert"})
-	users.Add(User{Name: "Qwerty"})
-	users.Add(User{Name: "Qwer"})
+	users.Add(&User{Name: "Qwert"})
+	users.Add(&User{Name: "Qwerty"})
+	users.Add(&User{Name: "Qwer"})
 
 	assert.Equal(t, 6, users.GetMaxNameLength())
 }
@@ -22,11 +23,15 @@ func Test_sort(t *testing.T) {
 	user1 := User{Name: "1", birthday: date.Birthday{Time: time.Date(1991, 11, 4, 0, 0, 0, 0, time.UTC)}}
 	user2 := User{Name: "2", birthday: date.Birthday{Time: time.Date(1991, 12, 5, 0, 0, 0, 0, time.UTC)}}
 	user3 := User{Name: "3", birthday: date.Birthday{Time: time.Date(1991, 5, 7, 0, 0, 0, 0, time.UTC)}}
-	users.Add(user1)
-	users.Add(user2)
-	users.Add(user3)
+	users.Add(&user1)
+	users.Add(&user2)
+	users.Add(&user3)
+
+	log.Println("users before sort", users.GetAllUsers())
 
 	users.sort()
+
+	log.Println("users after sort", users.GetAllUsers())
 
 	expected := []*User{&user3, &user1, &user2}
 
@@ -47,11 +52,11 @@ func Test_sortByDaysBeforeBirthday(t *testing.T) {
 	user4.SetBirthday(time.Date(1991, 7, 11, 0, 0, 0, 0, time.UTC), currentDate)
 	user5 := User{Name: "5"}
 	user5.SetBirthday(time.Date(1991, 12, 2, 0, 0, 0, 0, time.UTC), currentDate)
-	users.Add(user1)
-	users.Add(user2)
-	users.Add(user3)
-	users.Add(user4)
-	users.Add(user5)
+	users.Add(&user1)
+	users.Add(&user2)
+	users.Add(&user3)
+	users.Add(&user4)
+	users.Add(&user5)
 
 	result := users.sortByDaysBeforeBirthday()
 
@@ -74,11 +79,11 @@ func Test_GetNextBirthdayUsers_1(t *testing.T) {
 	user4.SetBirthday(time.Date(1991, 7, 11, 0, 0, 0, 0, time.UTC), currentDate)
 	user5 := User{Name: "5"}
 	user5.SetBirthday(time.Date(1991, 12, 2, 0, 0, 0, 0, time.UTC), currentDate)
-	users.Add(user1)
-	users.Add(user2)
-	users.Add(user3)
-	users.Add(user4)
-	users.Add(user5)
+	users.Add(&user1)
+	users.Add(&user2)
+	users.Add(&user3)
+	users.Add(&user4)
+	users.Add(&user5)
 
 	expected := []*User{&user3, &user4, &user5}
 
@@ -101,11 +106,11 @@ func Test_GetNextBirthdayUsers_2(t *testing.T) {
 	user4.SetBirthday(time.Date(1991, 7, 11, 0, 0, 0, 0, time.UTC), currentDate)
 	user5 := User{Name: "5"}
 	user5.SetBirthday(time.Date(1991, 12, 2, 0, 0, 0, 0, time.UTC), currentDate)
-	users.Add(user1)
-	users.Add(user2)
-	users.Add(user3)
-	users.Add(user4)
-	users.Add(user5)
+	users.Add(&user1)
+	users.Add(&user2)
+	users.Add(&user3)
+	users.Add(&user4)
+	users.Add(&user5)
 
 	expected := []*User{&user5, &user1, &user2, &user3}
 
@@ -128,11 +133,11 @@ func Test_GetNextBirthdayUsers_3(t *testing.T) {
 	user4.SetBirthday(time.Date(1991, 7, 11, 0, 0, 0, 0, time.UTC), currentDate)
 	user5 := User{Name: "5"}
 	user5.SetBirthday(time.Date(1991, 12, 2, 0, 0, 0, 0, time.UTC), currentDate)
-	users.Add(user1)
-	users.Add(user2)
-	users.Add(user3)
-	users.Add(user4)
-	users.Add(user5)
+	users.Add(&user1)
+	users.Add(&user2)
+	users.Add(&user3)
+	users.Add(&user4)
+	users.Add(&user5)
 
 	expected := []*User{&user3, &user4, &user5, &user1, &user2}
 

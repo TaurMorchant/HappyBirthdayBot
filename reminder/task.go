@@ -34,7 +34,7 @@ func isBirthdayComingUp(bot *bot.Bot) {
 	users := sheets.Read()
 	isUpdateNeeded := false
 	for _, user := range users.GetAllUsers() {
-		if user.DaysBeforeBirthday() == 365 && !user.BirthdayGreetings {
+		if user.DaysBeforeBirthday() == 0 && !user.BirthdayGreetings {
 			handleBirthday(bot, user)
 			isUpdateNeeded = true
 			continue
@@ -49,6 +49,14 @@ func isBirthdayComingUp(bot *bot.Bot) {
 			isUpdateNeeded = true
 			continue
 		}
+		if user.DaysBeforeBirthday() > 30 && user.BirthdayGreetings {
+			//reset
+			user.BirthdayGreetings = false
+			user.Reminder15days = false
+			user.Reminder30days = false
+			isUpdateNeeded = true
+		}
+
 	}
 	log.Println("isUpdateNeeded = ", isUpdateNeeded)
 	if isUpdateNeeded {
@@ -58,7 +66,7 @@ func isBirthdayComingUp(bot *bot.Bot) {
 
 func handleBirthday(bot *bot.Bot, user *usr.User) {
 	msg := fmt.Sprintf("Ура! Сегодня день рождения отмечает %s!", user.Name)
-	bot.SendWithEH(tgbotapi.NewMessage(handlers.MAIN_CHAT_ID, msg))
+	bot.SendWithEH(tgbotapi.NewMessage(handlers.MainChatId, msg))
 	user.BirthdayGreetings = true
 	user.Reminder15days = true
 	user.Reminder30days = true
@@ -70,7 +78,7 @@ func handle15Days(bot *bot.Bot, user *usr.User) {
 	if chatLink != "" {
 		msg += fmt.Sprintf("\n\nЕсли ты всё ещё не присоединился к обсуждению подарка - самое время: %s", chatLink)
 	}
-	message := tgbotapi.NewMessage(handlers.MAIN_CHAT_ID, msg)
+	message := tgbotapi.NewMessage(handlers.MainChatId, msg)
 	message.ParseMode = tgbotapi.ModeMarkdown
 	bot.SendWithEH(message)
 	user.Reminder15days = true
@@ -85,7 +93,7 @@ func handle30Days(bot *bot.Bot, user *usr.User) {
 	} else {
 		msg += fmt.Sprintf("\n\nНо кажется @morchant ещё не завел чатик для обсуждения! Ей, пните его кто-нибудь!")
 	}
-	message := tgbotapi.NewMessage(handlers.MAIN_CHAT_ID, msg)
+	message := tgbotapi.NewMessage(handlers.MainChatId, msg)
 	message.ParseMode = tgbotapi.ModeMarkdown
 	bot.SendWithEH(message)
 	user.Reminder30days = true
