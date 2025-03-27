@@ -91,12 +91,12 @@ func handleUpdate(bot *bot.Bot, update tgbotapi.Update) {
 	log.Println("update.Message.Chat.ID", update.Message.Chat.ID)
 
 	if !restrictions.IsUserAllowed(update.Message.From.ID) {
-		bot.SendWithEH(tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("Прости %s, мне запрещено с тобой общаться!", update.Message.From.UserName)))
+		bot.Send(update.Message.Chat.ID, fmt.Sprintf("Прости %s, мне запрещено с тобой общаться!", update.Message.From.UserName))
 		return
 	}
 
 	if !restrictions.IsChatAllowed(update.Message.Chat.ID) {
-		bot.SendWithEH(tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("Прости, мне запрещено общаться в этом чате!")))
+		bot.Send(update.Message.Chat.ID, fmt.Sprintf("Прости, мне запрещено общаться в этом чате!"))
 		return
 	}
 
@@ -107,13 +107,13 @@ func handleUpdate(bot *bot.Bot, update tgbotapi.Update) {
 	} else if update.Message.IsCommand() {
 		handler, ok := handlers.Handlers[update.Message.Command()]
 		if !ok {
-			bot.SendWithEH(tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("Я не знаю команду '%s', откуда ты ее взял?", update.Message.Command())))
+			bot.Send(update.Message.Chat.ID, fmt.Sprintf("Я не знаю команду '%s', откуда ты ее взял?", update.Message.Command()))
 			return
 		}
 		err := handler.Handle(bot, update)
 		if err != nil {
 			message := fmt.Sprintf("Случилась какая-то неведомая фигня, напиши @morchant об этом, пожалуйста")
-			bot.SendWithEH(tgbotapi.NewMessage(update.Message.Chat.ID, message))
+			bot.Send(update.Message.Chat.ID, message)
 		}
 	}
 }
@@ -123,7 +123,7 @@ func handlePanic(bot *bot.Bot, update tgbotapi.Update) {
 		log.Println("[PANIC] Panic was catch: ", p)
 		fmt.Println(string(debug.Stack()))
 		message := fmt.Sprintf("Случилась какая-то неведомая фигня, напиши @morchant об этом, пожалуйста")
-		bot.SendWithEH(tgbotapi.NewMessage(update.Message.Chat.ID, message))
+		bot.Send(update.Message.Chat.ID, message)
 	}
 }
 
@@ -139,12 +139,9 @@ func handleReply(bot *bot.Bot, update tgbotapi.Update) {
 	} else {
 		err := handler.HandleReply(bot, update)
 		if err != nil {
-			log.Println(err)
+			log.Println("Error in reply:", err)
 
-			message := tgbotapi.NewMessage(chatID, err.Error())
-			message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true}
-			message.ParseMode = tgbotapi.ModeMarkdown
-			bot.SendWithEH(message)
+			bot.SendWithForceReply(chatID, err.Error())
 			return
 		}
 		handlers.RemoveWaitingHandler(usr.UserId(userID))

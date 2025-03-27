@@ -11,11 +11,11 @@ type StartHandler struct {
 func (h StartHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
 
-	bot.SendWithEH(tgbotapi.NewMessage(chatID, "Я - бот-отеппибёздывватель! И вот что я умею:\n\nТУТ БУДЕТ ТЕКСТ"))
+	bot.Send(chatID, "Я - бот-отеппибёздывватель! И вот что я умею:\n\nТУТ БУДЕТ ТЕКСТ")
 
 	return nil
 }
 
-func (h StartHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
+func (h StartHandler) HandleReply(*bot.Bot, tgbotapi.Update) error {
 	return nil
 }

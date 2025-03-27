@@ -2,7 +2,6 @@ package reminder
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/magiconair/properties"
 	"github.com/robfig/cron/v3"
 	"happy-birthday-bot/bot"
@@ -66,7 +65,7 @@ func isBirthdayComingUp(bot *bot.Bot) {
 
 func handleBirthday(bot *bot.Bot, user *usr.User) {
 	msg := fmt.Sprintf("Ура! Сегодня день рождения отмечает %s!", user.Name)
-	bot.SendWithEH(tgbotapi.NewMessage(handlers.MainChatId, msg))
+	bot.Send(handlers.MainChatId, msg)
 	user.BirthdayGreetings = true
 	user.Reminder15days = true
 	user.Reminder30days = true
@@ -78,9 +77,7 @@ func handle15Days(bot *bot.Bot, user *usr.User) {
 	if chatLink != "" {
 		msg += fmt.Sprintf("\n\nЕсли ты всё ещё не присоединился к обсуждению подарка - самое время: %s", chatLink)
 	}
-	message := tgbotapi.NewMessage(handlers.MainChatId, msg)
-	message.ParseMode = tgbotapi.ModeMarkdown
-	bot.SendWithEH(message)
+	bot.Send(handlers.MainChatId, msg)
 	user.Reminder15days = true
 	user.Reminder30days = true
 }
@@ -93,9 +90,7 @@ func handle30Days(bot *bot.Bot, user *usr.User) {
 	} else {
 		msg += fmt.Sprintf("\n\nНо кажется @morchant ещё не завел чатик для обсуждения! Ей, пните его кто-нибудь!")
 	}
-	message := tgbotapi.NewMessage(handlers.MainChatId, msg)
-	message.ParseMode = tgbotapi.ModeMarkdown
-	bot.SendWithEH(message)
+	bot.Send(handlers.MainChatId, msg)
 	user.Reminder30days = true
 }
 

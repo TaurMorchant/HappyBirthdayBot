@@ -28,9 +28,7 @@ func (h RemindHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 		msg += formatterStr(user, maxNameLength) + "\n"
 	}
 	msg += "```"
-	message := tgbotapi.NewMessage(update.Message.Chat.ID, msg)
-	message.ParseMode = tgbotapi.ModeMarkdown
-	bot.SendWithEH(message)
+	bot.Send(update.Message.Chat.ID, msg)
 
 	return nil
 }

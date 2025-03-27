@@ -20,16 +20,12 @@ func (h JoinHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 
 	users := sheets.Read()
 	if _, ok := users.Get(usr.UserId(userID)); ok {
-		bot.SendWithEH(tgbotapi.NewMessage(chatID, "Ты уже зарегистрирован!"))
+		bot.Send(chatID, "Ты уже зарегистрирован!")
 		return nil
 	}
 
 	msg := "Отлично! Ответь на это сообщение вот так:\n\n`<Твое имя>, <дата рождения в формате DD.MM.YYYY>`\n\nНапример:\n\n`Вася Пупкин, 25.03.1990`"
-	message := tgbotapi.NewMessage(chatID, msg)
-	message.ParseMode = tgbotapi.ModeMarkdown
-	message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true} // Принудительный reply-режим
-
-	bot.SendWithEH(message)
+	bot.SendWithForceReply(chatID, msg)
 
 	WaitForReply(usr.UserId(userID), h)
 	return nil
@@ -41,7 +37,7 @@ func (h JoinHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
 
 	users := sheets.Read()
 	if _, ok := users.Get(usr.UserId(userID)); ok {
-		bot.SendWithEH(tgbotapi.NewMessage(chatID, "Ты уже зарегистрирован!"))
+		bot.Send(chatID, "Ты уже зарегистрирован!")
 		return nil
 	}
 
@@ -56,7 +52,7 @@ func (h JoinHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
 	users.Add(&user)
 	sheets.Write(&users)
 
-	bot.SendWithEH(tgbotapi.NewMessage(chatID, "Поздравляю, теперь тебя отхеппибёздят!"))
+	bot.Send(chatID, "Поздравляю, теперь тебя отхеппибёздят!")
 
 	return nil
 }

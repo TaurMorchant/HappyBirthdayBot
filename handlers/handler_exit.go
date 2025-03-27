@@ -19,14 +19,11 @@ func (h ExitHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 
 	if _, ok := users.Get(usr.UserId(userID)); ok {
 		msg := "Ты точно уверен, что не хочешь быть отхеппибёзднутым?\n\nЕсли уверен, ответь на  это сообщение `Да`"
-		message := tgbotapi.NewMessage(chatID, msg)
-		message.ParseMode = tgbotapi.ModeMarkdown
-		message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true} // Принудительный reply-режим
-		bot.SendWithEH(message)
+		bot.SendWithForceReply(chatID, msg)
 
 		WaitForReply(usr.UserId(userID), h)
 	} else {
-		bot.SendWithEH(tgbotapi.NewMessage(chatID, "Слыш, ты и так не в программе!"))
+		bot.Send(chatID, "Слыш, ты и так не в программе!")
 	}
 	return nil
 }
@@ -40,9 +37,7 @@ func (h ExitHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
 		users.Delete(usr.UserId(userID))
 		sheets.Write(&users)
 
-		message := tgbotapi.NewMessage(chatID, "Все пучком, ты удален из программы!")
-		message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: false, Selective: false}
-		bot.SendWithEH(message)
+		bot.Send(chatID, "Все пучком, ты удален из программы!")
 	}
 	return nil
 }

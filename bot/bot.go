@@ -9,9 +9,27 @@ type Bot struct {
 	tgbotapi.BotAPI
 }
 
-// todo принимать чат и текст, добавлять markdown
-func (b *Bot) SendWithEH(c tgbotapi.Chattable) *tgbotapi.Message {
-	mess, err := b.Send(c)
+func (b *Bot) Send(chatId int64, str string) *tgbotapi.Message {
+	message := prepareMessage(chatId, str)
+	return b.sendInternal(message)
+}
+
+func (b *Bot) SendWithForceReply(chatId int64, str string) *tgbotapi.Message {
+	message := prepareMessage(chatId, str)
+	message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true}
+	return b.sendInternal(message)
+}
+
+//----------------------------------------------------------------------------------------
+
+func prepareMessage(chatId int64, str string) *tgbotapi.MessageConfig {
+	message := tgbotapi.NewMessage(chatId, str)
+	message.ParseMode = tgbotapi.ModeMarkdown
+	return &message
+}
+
+func (b *Bot) sendInternal(message tgbotapi.Chattable) *tgbotapi.Message {
+	mess, err := b.BotAPI.Send(message)
 	if err != nil {
 		log.Panicln("[ERROR] Cannot send message: ", err)
 		return nil

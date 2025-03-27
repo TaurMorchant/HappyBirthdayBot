@@ -25,9 +25,7 @@ func (h ListHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 		msg += user.FormattedString(maxNameLength) + "\n"
 	}
 	msg += "\n```"
-	message := tgbotapi.NewMessage(chatID, msg)
-	message.ParseMode = "markdown"
-	bot.SendWithEH(message)
+	bot.Send(chatID, msg)
 
 	return nil
 }
