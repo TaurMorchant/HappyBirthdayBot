@@ -34,7 +34,7 @@ func (h RemindHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 		msg += formatterStr(user, maxNameLength, maxMonthLength) + "\n"
 	}
 	msg += "```"
-	bot.SendPic(update.Message.Chat.ID, msg, res.Many_of_cats)
+	bot.SendPic(update.Message.Chat.ID, msg, res.Many)
 
 	return nil
 }

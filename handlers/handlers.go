@@ -19,6 +19,6 @@ type CallbackElement struct {
 	Handler IHandler
 }
 
-var WaitingForCallbackHandlers = cache.New[int, CallbackElement](10*time.Second, 1*time.Minute)
+var WaitingForCallbackHandlers = cache.New[int, CallbackElement](5*time.Minute, 10*time.Minute)
 
-var WaitingForReplyHandlers = cache.New[int64, IHandler](30*time.Second, 1*time.Minute)
+var WaitingForReplyHandlers = cache.New[int64, IHandler](5*time.Minute, 10*time.Minute)

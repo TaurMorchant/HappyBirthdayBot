@@ -14,16 +14,18 @@ var templateFS embed.FS
 type ImageKey string
 
 var (
-	No_picture        ImageKey = ""
-	Vjuh              ImageKey = "img/cats/vjuh"
-	Many_of_cats      ImageKey = "img/cats/many_cats"
-	Cool_cat          ImageKey = "img/cats/cool_cat"
-	Sad_cat           ImageKey = "img/cats/sad_cat"
-	Do_not_understand ImageKey = "img/cats/do_not_understand"
-	Do_not_scream     ImageKey = "img/cats/do_not_scream"
-	Suspicious_cat    ImageKey = "img/cats/suspicious_cat"
-	Wishlist          ImageKey = "img/cats/wishlist"
-	Angry_cats        ImageKey = "img/cats/angry_cats"
+	NoPicture   ImageKey = ""
+	Vjuh        ImageKey = "img/cats/vjuh"
+	Many        ImageKey = "img/cats/many"
+	Cool        ImageKey = "img/cats/cool"
+	Sad         ImageKey = "img/cats/sad"
+	Error       ImageKey = "img/cats/error"
+	DoNotScream ImageKey = "img/cats/do_not_scream"
+	Suspicious  ImageKey = "img/cats/suspicious"
+	Wishlist    ImageKey = "img/cats/wishlist"
+	Angry       ImageKey = "img/cats/angry"
+	Ok          ImageKey = "img/cats/ok"
+	Waiting     ImageKey = "img/cats/waiting"
 )
 
 func GetImage(imageKey ImageKey) ([]byte, bool) {

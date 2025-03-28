@@ -11,12 +11,12 @@ type Bot struct {
 }
 
 func (b *Bot) SendText(chatId int64, text string) *tgbotapi.Message {
-	return b.sendWithOptions(chatId, text, res.No_picture, nil, 0)
+	return b.sendWithOptions(chatId, text, res.NoPicture, nil, 0)
 }
 
-func (b *Bot) SendTextForceReply(chatId int64, text string, replyToMessageId int) *tgbotapi.Message {
-	return b.sendWithOptions(chatId, text, res.No_picture, nil, replyToMessageId)
-}
+//func (b *Bot) SendTextForceReply(chatId int64, text string, replyToMessageId int) *tgbotapi.Message {
+//	return b.sendWithOptions(chatId, text, res.NoPicture, nil, replyToMessageId)
+//}
 
 func (b *Bot) SendPic(chatId int64, text string, imageKey res.ImageKey) *tgbotapi.Message {
 	return b.sendWithOptions(chatId, text, imageKey, nil, 0)
