@@ -31,11 +31,11 @@ func (h ExitHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 			),
 		)
 
-		sentMessage := bot.SendWithPic(chatID, msg, res.Sad_cat, &inlineKeyboard, false)
+		sentMessage := bot.SendWithPicAndKeyboard(chatID, msg, res.Sad_cat, &inlineKeyboard)
 
 		WaitingForCallbackHandlers.Add(sentMessage.MessageID, CallbackElement{UserId: userID, Handler: h})
 	} else {
-		bot.SendWithPic(chatID, "Слыш, ты и так не в программе!", res.Suspicious_cat, nil, false)
+		bot.SendWithPicBasic(chatID, "Слыш, ты и так не в программе!", res.Suspicious_cat)
 	}
 	return nil
 }
@@ -54,11 +54,11 @@ func (h ExitHandler) HandleCallback(bot *bot.Bot, update tgbotapi.Update) error 
 		users.Delete(usr.UserId(userID))
 		sheets.Write(&users)
 
-		bot.SendWithPic(chatID, "Штош, ты удален", res.Sad_cat, nil, false)
+		bot.SendWithPicBasic(chatID, "Штош, ты удален", res.Sad_cat)
 	} else if update.CallbackQuery.Data == cancelButton {
-		bot.SendWithPic(chatID, "Да ладно, ладно, не ори!", res.Do_not_scream, nil, false)
+		bot.SendWithPicBasic(chatID, "Да ладно, ладно, не ори!", res.Do_not_scream)
 	} else {
-		bot.SendWithPic(chatID, "Ты откуда вообще взял эту кнопку, тут ее не должно быть!", res.Do_not_understand, nil, false)
+		bot.SendWithPicBasic(chatID, "Ты откуда вообще взял эту кнопку, тут ее не должно быть!", res.Do_not_understand)
 	}
 
 	return nil

@@ -130,9 +130,17 @@ func notRestricted(bot *bot.Bot, update tgbotapi.Update) bool {
 func handlePanic(bot *bot.Bot, update tgbotapi.Update) {
 	if p := recover(); p != nil {
 		log.Println("[PANIC] Panic was catch: ", p)
-		fmt.Println(string(debug.Stack()))
+		log.Println(string(debug.Stack()))
 		message := fmt.Sprintf("Случилась какая-то неведомая фигня, напиши @morchant об этом, пожалуйста")
-		bot.Send(update.Message.Chat.ID, message)
+		bot.SendWithPicBasic(resolveChatId(update), message, res.Do_not_understand)
+	}
+}
+
+func resolveChatId(update tgbotapi.Update) int64 {
+	if update.CallbackQuery != nil {
+		return update.CallbackQuery.Message.Chat.ID
+	} else {
+		return update.Message.Chat.ID
 	}
 }
 
@@ -141,13 +149,14 @@ func handleReply(bot *bot.Bot, update tgbotapi.Update) {
 
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
+	messageID := update.Message.MessageID
 
 	if handler, ok := handlers.WaitingForReplyHandlers.Get(userID); ok {
 		err := handler.HandleReply(bot, update)
 		if err != nil {
 			log.Println("Error in reply:", err)
 
-			bot.SendWithForceReply(chatID, err.Error())
+			bot.SendWithForceReply(chatID, messageID, err.Error())
 			return
 		}
 		handlers.WaitingForReplyHandlers.Delete(userID)
@@ -167,7 +176,7 @@ func handleCallback(bot *bot.Bot, update tgbotapi.Update) {
 
 	if callbackElement, ok := handlers.WaitingForCallbackHandlers.Get(messageId); ok {
 		if callbackElement.UserId != userID {
-			bot.SendWithPic(chatId, "Это не для тебя кнопки, не трогай!", res.Angry_cats, nil, false)
+			bot.SendWithPicBasic(chatId, "Это не для тебя кнопки, не трогай!", res.Angry_cats)
 			return
 		} else {
 			err := callbackElement.Handler.HandleCallback(bot, update)
@@ -189,7 +198,6 @@ func removeButtonAnimation(bot *bot.Bot, update tgbotapi.Update) {
 	}
 }
 
-// todo сейчас при удалении кнопок исчезает и форматирование
 func removeInlineButtons(bot *bot.Bot, update tgbotapi.Update) {
 	editMsg := tgbotapi.NewEditMessageReplyMarkup(
 		update.CallbackQuery.Message.Chat.ID,

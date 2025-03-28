@@ -5,7 +5,6 @@ package restrictions
 import (
 	"fmt"
 	"github.com/magiconair/properties"
-	"log"
 )
 
 var allowedUsers *properties.Properties
@@ -17,7 +16,6 @@ func init() {
 }
 
 func IsUserAllowed(userId int64) bool {
-	log.Println("fmt.Sprintf(\"d\", userId) = ", fmt.Sprintf("%d", userId))
 	return allowedUsers.GetString(fmt.Sprintf("%d", userId), "") != ""
 }
 

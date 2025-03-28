@@ -15,13 +15,28 @@ func (b *Bot) Send(chatId int64, msg string) *tgbotapi.Message {
 	return b.sendInternal(message)
 }
 
-func (b *Bot) SendWithForceReply(chatId int64, msg string) *tgbotapi.Message {
+func (b *Bot) SendWithForceReply(chatId int64, replyToMessageId int, msg string) *tgbotapi.Message {
 	message := prepareMessage(chatId, msg)
 	message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true}
+	message.ReplyToMessageID = replyToMessageId
 	return b.sendInternal(message)
 }
 
-func (b *Bot) SendWithPic(chatId int64, msg string, imageKey res.ImageKey, keyboard *tgbotapi.InlineKeyboardMarkup, forceReply bool) *tgbotapi.Message {
+func (b *Bot) SendWithPicBasic(chatId int64, msg string, imageKey res.ImageKey) *tgbotapi.Message {
+	return b.sendWithPicInternal(chatId, msg, imageKey, nil, 0)
+}
+
+func (b *Bot) SendWithPicAndForceReply(chatId int64, msg string, imageKey res.ImageKey, replyToMessageId int) *tgbotapi.Message {
+	return b.sendWithPicInternal(chatId, msg, imageKey, nil, replyToMessageId)
+}
+
+func (b *Bot) SendWithPicAndKeyboard(chatId int64, msg string, imageKey res.ImageKey, keyboard *tgbotapi.InlineKeyboardMarkup) *tgbotapi.Message {
+	return b.sendWithPicInternal(chatId, msg, imageKey, keyboard, 0)
+}
+
+//----------------------------------------------------------------------------------------
+
+func (b *Bot) sendWithPicInternal(chatId int64, msg string, imageKey res.ImageKey, keyboard *tgbotapi.InlineKeyboardMarkup, replyToMessageId int) *tgbotapi.Message {
 	file, err := res.GetImage(imageKey)
 	if err != nil {
 		log.Println("Cannot get image", err)
@@ -35,18 +50,20 @@ func (b *Bot) SendWithPic(chatId int64, msg string, imageKey res.ImageKey, keybo
 		message := tgbotapi.NewPhoto(chatId, photo)
 		message.Caption = msg
 		message.ParseMode = tgbotapi.ModeMarkdown
+		if keyboard != nil && replyToMessageId != 0 {
+			panic("Одновременное задание keyboard и replyToMessageId запрещено!")
+		}
 		if keyboard != nil {
 			message.ReplyMarkup = keyboard
 		}
-		if forceReply {
+		if replyToMessageId != 0 {
 			message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true}
+			message.ReplyToMessageID = replyToMessageId
 		}
 
 		return b.sendInternal(message)
 	}
 }
-
-//----------------------------------------------------------------------------------------
 
 func (b *Bot) sendWithKeyboard(chatId int64, msg string, keyboard *tgbotapi.InlineKeyboardMarkup) *tgbotapi.Message {
 	message := prepareMessage(chatId, msg)

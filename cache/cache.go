@@ -7,11 +7,11 @@ import (
 	"time"
 )
 
-type Cache[K, V any] struct {
+type Cache[K any, V interface{}] struct {
 	gocache.Cache
 }
 
-func New[K, V any](defaultExpiration, cleanupInterval time.Duration) *Cache[K, V] {
+func New[K any, V interface{}](defaultExpiration, cleanupInterval time.Duration) *Cache[K, V] {
 	result := Cache[K, V]{Cache: *gocache.New(defaultExpiration, cleanupInterval)}
 	return &result
 }
@@ -26,7 +26,12 @@ func (c *Cache[K, V]) Add(key K, value V) {
 func (c *Cache[K, V]) Get(key K) (V, bool) {
 	log.Println("[TRACE] All elements in cache: ", c.Items())
 	result, ok := c.Cache.Get(fmt.Sprintf("%d", key))
-	return result.(V), ok
+	if ok {
+		return result.(V), ok
+	} else {
+		var zero V
+		return zero, ok
+	}
 }
 
 func (c *Cache[K, V]) Delete(key K) {

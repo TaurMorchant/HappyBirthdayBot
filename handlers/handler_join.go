@@ -18,15 +18,16 @@ func (h JoinHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	log.Printf("handle join command")
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
+	messageID := update.Message.MessageID
 
 	users := sheets.Read()
 	if _, ok := users.Get(usr.UserId(userID)); ok {
-		bot.SendWithPic(chatID, "Ты уже зарегистрирован!", res.Cool_cat, nil, false)
+		bot.SendWithPicBasic(chatID, "Ты уже зарегистрирован!", res.Cool_cat)
 		return nil
 	}
 
 	msg := "Отлично! Ответь на это сообщение вот так:\n\n`<Твое имя>, <дата рождения в формате DD.MM.YYYY>`\n\nНапример:\n\n`Вася Пупкин, 25.03.1990`"
-	bot.SendWithForceReply(chatID, msg)
+	bot.SendWithForceReply(chatID, messageID, msg)
 
 	WaitingForReplyHandlers.Add(userID, h)
 	return nil
@@ -38,7 +39,7 @@ func (h JoinHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
 
 	users := sheets.Read()
 	if _, ok := users.Get(usr.UserId(userID)); ok {
-		bot.SendWithPic(chatID, "Ты уже зарегистрирован!", res.Cool_cat, nil, false)
+		bot.SendWithPicBasic(chatID, "Ты уже зарегистрирован!", res.Cool_cat)
 		return nil
 	}
 
@@ -53,7 +54,7 @@ func (h JoinHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
 	users.Add(&user)
 	sheets.Write(&users)
 
-	bot.SendWithPic(chatID, "Поздравляю, теперь тебя отхеппибёздят!", res.Cool_cat, nil, false)
+	bot.SendWithPicBasic(chatID, "Поздравляю, теперь тебя отхеппибёздят!", res.Cool_cat)
 
 	return nil
 }

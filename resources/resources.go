@@ -3,7 +3,6 @@ package res
 import (
 	"embed"
 	"errors"
-	"fmt"
 	"io/fs"
 	"log"
 	"math/rand"
@@ -26,19 +25,13 @@ const (
 	Angry_cats        ImageKey = "img/cats/angry_cats"
 )
 
-func ReadFile() {
-	// Чтение файла из встроенной FS
-	data, err := templateFS.ReadFile("test.txt")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(string(data))
-}
-
 func GetImage(imageKey ImageKey) ([]byte, error) {
+	log.Printf("[DEBUG] get image %s", imageKey)
 	if isDir(imageKey) {
+		log.Printf("[DEBUG] it is directory")
 		return getRandomImage(imageKey)
 	} else {
+		log.Printf("[DEBUG] it is file")
 		return templateFS.ReadFile(string(imageKey))
 	}
 }
@@ -69,7 +62,6 @@ func getRandomImage(imageKey ImageKey) ([]byte, error) {
 func isDir(key ImageKey) bool {
 	_, err := templateFS.ReadFile(string(key))
 	if err != nil {
-		log.Println("err", err.Error())
 		var pathErr *fs.PathError
 		if errors.As(err, &pathErr) {
 			return true

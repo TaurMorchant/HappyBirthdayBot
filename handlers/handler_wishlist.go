@@ -16,13 +16,14 @@ type WishlistHandler struct {
 func (h WishlistHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
+	mesageID := update.Message.MessageID
 
 	users := sheets.Read()
 
 	if user, ok := users.Get(usr.UserId(userID)); ok {
 		if len(user.Wishlist) == 0 {
 			msg := "Похоже ты еще не составил свой вишлист! Самое время это сделать! Напиши в ответ на это сообщение, что бы ты хотел получить в подарок?"
-			bot.SendWithPic(chatID, msg, res.Wishlist, nil, true)
+			bot.SendWithPicAndForceReply(chatID, msg, res.Wishlist, mesageID)
 			WaitingForReplyHandlers.Add(userID, h)
 		} else {
 			msg := fmt.Sprintf("Вот так выглядит твой вишлист:\n\n```\n%s\n```\n"+
@@ -34,11 +35,11 @@ func (h WishlistHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 					tgbotapi.NewInlineKeyboardButtonData("Не, все норм", cancelButton),
 				),
 			)
-			sentMessage := bot.SendWithPic(chatID, msg, res.Wishlist, &inlineKeyboard, false)
+			sentMessage := bot.SendWithPicAndKeyboard(chatID, msg, res.Wishlist, &inlineKeyboard)
 			WaitingForCallbackHandlers.Add(sentMessage.MessageID, CallbackElement{UserId: userID, Handler: h})
 		}
 	} else {
-		bot.SendWithPic(chatID, "Кажется ты еще не зарегистрирован в программе! Зарегистрируйся при помощи команды `/join`!", res.Suspicious_cat, nil, false)
+		bot.SendWithPicBasic(chatID, "Кажется ты еще не зарегистрирован в программе! Зарегистрируйся при помощи команды `/join`!", res.Suspicious_cat)
 	}
 
 	return nil
@@ -53,7 +54,7 @@ func (h WishlistHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error
 		user.Wishlist = update.Message.Text
 		sheets.Write(&users)
 
-		bot.SendWithPic(chatID, "Вжух, вишлист обновлён!", res.Vjuh, nil, false)
+		bot.SendWithPicBasic(chatID, "Вжух, вишлист обновлён!", res.Vjuh)
 	} else {
 		log.Panicf("User with ID %d not found", usr.UserId(userID))
 	}
@@ -64,15 +65,16 @@ func (h WishlistHandler) HandleCallback(bot *bot.Bot, update tgbotapi.Update) er
 	log.Println("Handle callback for WishlistHandler")
 	chatID := update.CallbackQuery.Message.Chat.ID
 	userID := update.CallbackQuery.From.ID
+	mesageID := update.CallbackQuery.Message.MessageID
 
 	if update.CallbackQuery.Data == okButton {
 		msg := "Напиши в ответ на это сообщение, что бы ты хотел получить в подарок?"
-		bot.SendWithPic(chatID, msg, res.Wishlist, nil, true)
+		bot.SendWithPicAndForceReply(chatID, msg, res.Wishlist, mesageID)
 		WaitingForReplyHandlers.Add(userID, h)
 	} else if update.CallbackQuery.Data == cancelButton {
 		bot.Send(chatID, "Океюшки")
 	} else {
-		bot.SendWithPic(chatID, "Ты откуда вообще взял эту кнопку, тут ее не должно быть!", res.Suspicious_cat, nil, false)
+		bot.SendWithPicBasic(chatID, "Ты откуда вообще взял эту кнопку, тут ее не должно быть!", res.Suspicious_cat)
 	}
 
 	return nil

@@ -26,7 +26,7 @@ func (h ListHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 		msg += user.FormattedString(maxNameLength) + "\n"
 	}
 	msg += "\n```"
-	bot.SendWithPic(chatID, msg, res.Many_of_cats, nil, false)
+	bot.SendWithPicBasic(chatID, msg, res.Many_of_cats)
 
 	return nil
 }
