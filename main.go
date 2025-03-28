@@ -99,7 +99,7 @@ func handleUpdate(bot *bot.Bot, update tgbotapi.Update) {
 			if update.Message.IsCommand() {
 				handler, ok := handlers.Handlers[update.Message.Command()]
 				if !ok {
-					bot.Send(update.Message.Chat.ID, fmt.Sprintf("Я не знаю команду '%s', откуда ты ее взял?", update.Message.Command()))
+					bot.SendText(update.Message.Chat.ID, fmt.Sprintf("Я не знаю команду '%s', откуда ты ее взял?", update.Message.Command()))
 					return
 				}
 				err := handler.Handle(bot, update)
@@ -115,12 +115,12 @@ func handleUpdate(bot *bot.Bot, update tgbotapi.Update) {
 
 func notRestricted(bot *bot.Bot, update tgbotapi.Update) bool {
 	if !restrictions.IsUserAllowed(update.Message.From.ID) {
-		bot.Send(update.Message.Chat.ID, fmt.Sprintf("Прости %s, мне запрещено с тобой общаться!", update.Message.From.UserName))
+		bot.SendText(update.Message.Chat.ID, fmt.Sprintf("Прости %s, мне запрещено с тобой общаться!", update.Message.From.UserName))
 		return false
 	}
 
 	if !restrictions.IsChatAllowed(update.Message.Chat.ID) {
-		bot.Send(update.Message.Chat.ID, fmt.Sprintf("Прости, мне запрещено общаться в этом чате!"))
+		bot.SendText(update.Message.Chat.ID, fmt.Sprintf("Прости, мне запрещено общаться в этом чате!"))
 		return false
 	}
 
@@ -132,7 +132,7 @@ func handlePanic(bot *bot.Bot, update tgbotapi.Update) {
 		log.Println("[PANIC] Panic was catch: ", p)
 		log.Println(string(debug.Stack()))
 		message := fmt.Sprintf("Случилась какая-то неведомая фигня, напиши @morchant об этом, пожалуйста")
-		bot.SendWithPicBasic(resolveChatId(update), message, res.Do_not_understand)
+		bot.SendPic(resolveChatId(update), message, res.Do_not_understand)
 	}
 }
 
@@ -156,7 +156,7 @@ func handleReply(bot *bot.Bot, update tgbotapi.Update) {
 		if err != nil {
 			log.Println("Error in reply:", err)
 
-			bot.SendWithForceReply(chatID, messageID, err.Error())
+			bot.SendTextForceReply(chatID, err.Error(), messageID)
 			return
 		}
 		handlers.WaitingForReplyHandlers.Delete(userID)
@@ -176,7 +176,7 @@ func handleCallback(bot *bot.Bot, update tgbotapi.Update) {
 
 	if callbackElement, ok := handlers.WaitingForCallbackHandlers.Get(messageId); ok {
 		if callbackElement.UserId != userID {
-			bot.SendWithPicBasic(chatId, "Это не для тебя кнопки, не трогай!", res.Angry_cats)
+			bot.SendPic(chatId, "Это не для тебя кнопки, не трогай!", res.Angry_cats)
 			return
 		} else {
 			err := callbackElement.Handler.HandleCallback(bot, update)

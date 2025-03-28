@@ -11,7 +11,7 @@ type StartHandler struct {
 func (h StartHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
 
-	bot.Send(chatID, "Я - бот-отеппибёздывватель! И вот что я умею:\n\nТУТ БУДЕТ ТЕКСТ")
+	bot.SendText(chatID, "Я - бот-отеппибёздывватель! И вот что я умею:\n\nТУТ БУДЕТ ТЕКСТ")
 
 	return nil
 }

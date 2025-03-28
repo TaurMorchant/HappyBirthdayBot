@@ -13,7 +13,8 @@ var templateFS embed.FS
 
 type ImageKey string
 
-const (
+var (
+	No_picture        ImageKey = ""
 	Vjuh              ImageKey = "img/cats/vjuh"
 	Many_of_cats      ImageKey = "img/cats/many_cats"
 	Cool_cat          ImageKey = "img/cats/cool_cat"
@@ -25,21 +26,27 @@ const (
 	Angry_cats        ImageKey = "img/cats/angry_cats"
 )
 
-func GetImage(imageKey ImageKey) ([]byte, error) {
+func GetImage(imageKey ImageKey) ([]byte, bool) {
 	log.Printf("[DEBUG] get image %s", imageKey)
 	if isDir(imageKey) {
 		log.Printf("[DEBUG] it is directory")
 		return getRandomImage(imageKey)
 	} else {
 		log.Printf("[DEBUG] it is file")
-		return templateFS.ReadFile(string(imageKey))
+		result, err := templateFS.ReadFile(string(imageKey))
+		if err != nil {
+			log.Printf("[ERROR] get image %s failed, err = %s", imageKey, err.Error())
+			return nil, false
+		}
+		return result, true
 	}
 }
 
-func getRandomImage(imageKey ImageKey) ([]byte, error) {
+func getRandomImage(imageKey ImageKey) ([]byte, bool) {
 	files, err := templateFS.ReadDir(string(imageKey))
 	if err != nil {
-		return nil, err
+		log.Printf("[ERROR] get random image %s failed, err = %s", imageKey, err.Error())
+		return nil, false
 	}
 
 	// Фильтруем только файлы (исключаем поддиректории)
@@ -51,12 +58,18 @@ func getRandomImage(imageKey ImageKey) ([]byte, error) {
 	}
 
 	if len(images) == 0 {
-		return nil, err
+		return nil, false
 	}
 
 	randomImage := images[rand.Intn(len(images))]
 
-	return templateFS.ReadFile(string(imageKey) + "/" + randomImage)
+	imagePath := string(imageKey) + "/" + randomImage
+	result, err := templateFS.ReadFile(imagePath)
+	if err != nil {
+		log.Printf("[ERROR] get image %s failed, err = %s", imagePath, err.Error())
+		return nil, false
+	}
+	return result, true
 }
 
 func isDir(key ImageKey) bool {
