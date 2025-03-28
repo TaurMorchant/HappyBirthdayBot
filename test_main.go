@@ -1,6 +1,6 @@
 package main
 
-func main() {
+func main2() {
 	//users := sheets.Read()
 	//
 	//log.Println("original usr:", users)

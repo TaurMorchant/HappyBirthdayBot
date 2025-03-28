@@ -1,5 +1,7 @@
 package restrictions
 
+//todo rename to properties?
+
 import (
 	"fmt"
 	"github.com/magiconair/properties"

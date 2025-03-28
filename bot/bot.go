@@ -2,6 +2,7 @@ package bot
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"happy-birthday-bot/resources"
 	"log"
 )
 
@@ -9,21 +10,43 @@ type Bot struct {
 	tgbotapi.BotAPI
 }
 
-func (b *Bot) Send(chatId int64, str string) *tgbotapi.Message {
-	message := prepareMessage(chatId, str)
+func (b *Bot) Send(chatId int64, msg string) *tgbotapi.Message {
+	message := prepareMessage(chatId, msg)
 	return b.sendInternal(message)
 }
 
-func (b *Bot) SendWithForceReply(chatId int64, str string) *tgbotapi.Message {
-	message := prepareMessage(chatId, str)
+func (b *Bot) SendWithForceReply(chatId int64, msg string) *tgbotapi.Message {
+	message := prepareMessage(chatId, msg)
 	message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true}
 	return b.sendInternal(message)
 }
 
-func (b *Bot) SendWithKeyboard(chatId int64, str string, keyboard tgbotapi.InlineKeyboardMarkup) *tgbotapi.Message {
-	message := prepareMessage(chatId, str)
+func (b *Bot) SendWithKeyboard(chatId int64, msg string, keyboard tgbotapi.InlineKeyboardMarkup) *tgbotapi.Message {
+	message := prepareMessage(chatId, msg)
 	message.ReplyMarkup = keyboard
 	return b.sendInternal(message)
+}
+
+func (b *Bot) SendWithPic(chatId int64, msg string, imageKey res.ImageKey, keyboard *tgbotapi.InlineKeyboardMarkup) *tgbotapi.Message {
+	file, err := res.GetImage(imageKey)
+	if err != nil {
+		log.Println("Cannot get image", err)
+		return b.Send(chatId, msg)
+	} else {
+		photo := tgbotapi.FileBytes{
+			Name:  string(imageKey),
+			Bytes: file,
+		}
+
+		message := tgbotapi.NewPhoto(chatId, photo)
+		message.Caption = msg
+		message.ParseMode = tgbotapi.ModeMarkdown
+		if keyboard != nil {
+			message.ReplyMarkup = keyboard
+		}
+
+		return b.sendInternal(message)
+	}
 }
 
 //----------------------------------------------------------------------------------------

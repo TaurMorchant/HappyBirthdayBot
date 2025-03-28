@@ -3,6 +3,7 @@ package handlers
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"happy-birthday-bot/bot"
+	res "happy-birthday-bot/resources"
 	"happy-birthday-bot/sheets"
 	"log"
 )
@@ -25,7 +26,7 @@ func (h ListHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 		msg += user.FormattedString(maxNameLength) + "\n"
 	}
 	msg += "\n```"
-	bot.Send(chatID, msg)
+	bot.SendWithPic(chatID, msg, res.Many_of_cats, nil)
 
 	return nil
 }

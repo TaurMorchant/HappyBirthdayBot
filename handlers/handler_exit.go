@@ -3,6 +3,7 @@ package handlers
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"happy-birthday-bot/bot"
+	res "happy-birthday-bot/resources"
 	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
 	"log"
@@ -21,7 +22,7 @@ func (h ExitHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	users := sheets.Read()
 
 	if _, ok := users.Get(usr.UserId(userID)); ok {
-		msg := "Ты точно уверен, что хочешь уйти из программы и не жулаешь быть отхеппибёзднутым?"
+		msg := "Ты уверен, что хочешь уйти из программы и не желаешь быть отхеппибёзднутым?"
 
 		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
@@ -30,7 +31,7 @@ func (h ExitHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 			),
 		)
 
-		sentMessage := bot.SendWithKeyboard(chatID, msg, inlineKeyboard)
+		sentMessage := bot.SendWithPic(chatID, msg, res.Sad_cat, &inlineKeyboard)
 
 		WaitingForCallbackHandlers.Add(sentMessage.MessageID, CallbackElement{UserId: userID, Handler: h})
 		//
@@ -55,7 +56,7 @@ func (h ExitHandler) HandleCallback(bot *bot.Bot, update tgbotapi.Update) error 
 		users.Delete(usr.UserId(userID))
 		sheets.Write(&users)
 
-		bot.Send(chatID, "Все пучком, ты удален из программы!")
+		bot.SendWithPic(chatID, "Штош, ты удален", res.Sad_cat, nil)
 	} else if update.CallbackQuery.Data == cancelButton {
 		bot.Send(chatID, "Да ладно, ладно, не ори!")
 	} else {

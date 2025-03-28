@@ -4,6 +4,7 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"happy-birthday-bot/bot"
+	"happy-birthday-bot/resources"
 	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
 	"log"
@@ -51,8 +52,8 @@ func (h WishlistHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error
 	if user, ok := users.Get(usr.UserId(userID)); ok {
 		user.Wishlist = update.Message.Text
 		sheets.Write(&users)
-		//todo картинка с котиком
-		bot.Send(chatID, "Вжух, вишлист обновлён!")
+
+		bot.SendWithPic(chatID, "Вжух, вишлист обновлён!", res.Vjuh, nil)
 	} else {
 		log.Panicf("User with ID %d not found", usr.UserId(userID))
 	}

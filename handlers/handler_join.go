@@ -4,6 +4,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"happy-birthday-bot/bot"
 	"happy-birthday-bot/date"
+	res "happy-birthday-bot/resources"
 	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
 	"log"
@@ -20,7 +21,7 @@ func (h JoinHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 
 	users := sheets.Read()
 	if _, ok := users.Get(usr.UserId(userID)); ok {
-		bot.Send(chatID, "Ты уже зарегистрирован!")
+		bot.SendWithPic(chatID, "Ты уже зарегистрирован!", res.Cool_cat, nil)
 		return nil
 	}
 
@@ -37,7 +38,7 @@ func (h JoinHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
 
 	users := sheets.Read()
 	if _, ok := users.Get(usr.UserId(userID)); ok {
-		bot.Send(chatID, "Ты уже зарегистрирован!")
+		bot.SendWithPic(chatID, "Ты уже зарегистрирован!", res.Cool_cat, nil)
 		return nil
 	}
 
@@ -52,7 +53,7 @@ func (h JoinHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
 	users.Add(&user)
 	sheets.Write(&users)
 
-	bot.Send(chatID, "Поздравляю, теперь тебя отхеппибёздят!")
+	bot.SendWithPic(chatID, "Поздравляю, теперь тебя отхеппибёздят!", res.Cool_cat, nil)
 
 	return nil
 }
