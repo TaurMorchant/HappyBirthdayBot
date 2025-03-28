@@ -7,6 +7,7 @@ import (
 	res "happy-birthday-bot/resources"
 	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
+	"log"
 )
 
 type RemindHandler struct {
@@ -17,16 +18,20 @@ const numberOfNames = 3
 func (h RemindHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	users := sheets.Read()
 
-	maxNameLength := users.GetMaxNameLength()
-
 	nextBirthdayUsers, err := users.GetNextBirthdayUsers(numberOfNames)
 	if err != nil {
 		return err
 	}
 
+	maxNameLength := nextBirthdayUsers.GetMaxNameLength()
+	maxMonthLength := nextBirthdayUsers.GetMaxMonthLength()
+
+	log.Println("maxNameLength = ", maxNameLength)
+	log.Println("maxMonthLength = ", maxMonthLength)
+
 	msg := "Ближайшие именинники:\n```\n"
-	for _, user := range nextBirthdayUsers {
-		msg += formatterStr(user, maxNameLength) + "\n"
+	for _, user := range nextBirthdayUsers.AllUsers() {
+		msg += formatterStr(user, maxNameLength, maxMonthLength) + "\n"
 	}
 	msg += "```"
 	bot.SendPic(update.Message.Chat.ID, msg, res.Many_of_cats)
@@ -34,16 +39,15 @@ func (h RemindHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	return nil
 }
 
-// todo ограничить длиной самого длинного месяца
-func formatterStr(user *usr.User, maxNameLength int) string {
-	return user.FormattedString(maxNameLength) + formatDaysLeft(user.DaysBeforeBirthday())
+func formatterStr(user *usr.User, maxNameLength, maxMonthLength int) string {
+	return user.FormattedString(maxNameLength, maxMonthLength) + formatDaysLeft(user.DaysBeforeBirthday())
 }
 
 func formatDaysLeft(days int) string {
 	if days == 0 {
-		return " (уже сегодня! 😱)"
+		return "(сегодня!😱)"
 	} else {
-		return fmt.Sprintf(" (еще %d %s)", days, getDaysWord(days))
+		return fmt.Sprintf("(%d %s)", days, getDaysWord(days))
 	}
 }
 

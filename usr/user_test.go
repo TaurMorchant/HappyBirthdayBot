@@ -13,7 +13,7 @@ func Test_SetBirthday(t *testing.T) {
 	user.SetBirthday(userDate, time.Now())
 
 	assert.Equal(t, 13, user.birthday.GetDay())
-	assert.Equal(t, "июня", user.birthday.GetMonth())
+	assert.Equal(t, "июня", user.birthday.MonthName())
 }
 
 func Test_GetDaysBeforeBirthday_1(t *testing.T) {
@@ -82,7 +82,7 @@ func Test_FormattedString_1(t *testing.T) {
 	user := User{Name: "Вася"}
 	user.SetBirthday(userDate, time.Now())
 
-	assert.Equal(t, "      Вася — 3  июня    ", user.FormattedString(10))
+	assert.Equal(t, "      Вася — 3  июня    ", user.FormattedString(10, 8))
 }
 
 func Test_FormattedString_2(t *testing.T) {
@@ -91,5 +91,5 @@ func Test_FormattedString_2(t *testing.T) {
 	user := User{Name: "Вася"}
 	user.SetBirthday(userDate, time.Now())
 
-	assert.Equal(t, "      Вася — 13 сентября", user.FormattedString(10))
+	assert.Equal(t, "      Вася — 13 сентября", user.FormattedString(10, 8))
 }

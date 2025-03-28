@@ -4,7 +4,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/exp/slices"
 	"happy-birthday-bot/date"
-	"log"
 	"testing"
 	"time"
 )
@@ -27,15 +26,11 @@ func Test_sort(t *testing.T) {
 	users.Add(&user2)
 	users.Add(&user3)
 
-	log.Println("users before sort", users.GetAllUsers())
-
 	users.sort()
-
-	log.Println("users after sort", users.GetAllUsers())
 
 	expected := []*User{&user3, &user1, &user2}
 
-	assert.True(t, slices.Equal(expected, users.GetAllUsers()))
+	assert.True(t, slices.Equal(expected, users.AllUsers()))
 }
 
 func Test_sortByDaysBeforeBirthday(t *testing.T) {
@@ -62,7 +57,7 @@ func Test_sortByDaysBeforeBirthday(t *testing.T) {
 
 	expected := []*User{&user3, &user4, &user5, &user1, &user2}
 
-	assert.True(t, slices.Equal(expected, result.GetAllUsers()))
+	assert.True(t, slices.Equal(expected, result.AllUsers()))
 }
 
 func Test_GetNextBirthdayUsers_1(t *testing.T) {
@@ -89,7 +84,7 @@ func Test_GetNextBirthdayUsers_1(t *testing.T) {
 
 	result, _ := users.GetNextBirthdayUsers(3)
 
-	assert.True(t, slices.Equal(expected, result))
+	assert.True(t, slices.Equal(expected, result.AllUsers()))
 }
 
 func Test_GetNextBirthdayUsers_2(t *testing.T) {
@@ -116,7 +111,7 @@ func Test_GetNextBirthdayUsers_2(t *testing.T) {
 
 	result, _ := users.GetNextBirthdayUsers(4)
 
-	assert.True(t, slices.Equal(expected, result))
+	assert.True(t, slices.Equal(expected, result.AllUsers()))
 }
 
 func Test_GetNextBirthdayUsers_3(t *testing.T) {
@@ -143,5 +138,5 @@ func Test_GetNextBirthdayUsers_3(t *testing.T) {
 
 	result, _ := users.GetNextBirthdayUsers(999)
 
-	assert.True(t, slices.Equal(expected, result))
+	assert.True(t, slices.Equal(expected, result.AllUsers()))
 }

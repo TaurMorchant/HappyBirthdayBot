@@ -21,8 +21,8 @@ type User struct {
 
 //---------------------------------------------------------------------------------------------------------------------
 
-func (u *User) FormattedString(maxNameLength int) string {
-	return fmt.Sprintf("%*s — %-11s", maxNameLength, u.Name, u.birthday.ToString())
+func (u *User) FormattedString(maxNameLength, maxMonthLength int) string {
+	return fmt.Sprintf("%*s — %s", maxNameLength, u.Name, u.birthday.ToString(maxMonthLength))
 }
 
 func (u *User) SetBirthday(t time.Time, timeNow time.Time) {

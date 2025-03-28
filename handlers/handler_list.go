@@ -18,12 +18,13 @@ func (h ListHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	msg := "📅 Список всех участников:\n```\n"
 
 	users := sheets.Read()
-	usersSlice := users.GetAllUsers()
+	usersSlice := users.AllUsers()
 
 	maxNameLength := users.GetMaxNameLength()
+	maxMonthLength := users.GetMaxMonthLength()
 
 	for _, user := range usersSlice {
-		msg += user.FormattedString(maxNameLength) + "\n"
+		msg += user.FormattedString(maxNameLength, maxMonthLength) + "\n"
 	}
 	msg += "\n```"
 	bot.SendPic(chatID, msg, res.Many_of_cats)

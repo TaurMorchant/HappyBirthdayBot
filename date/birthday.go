@@ -6,8 +6,8 @@ import (
 )
 
 type Birthday struct {
-	day   int
-	month string
+	day       int
+	monthName string
 	time.Time
 }
 
@@ -35,15 +35,15 @@ func ToBirthday(input time.Time) Birthday {
 	day := input.Day()
 	month := months[input.Month()]
 
-	return Birthday{day: day, month: month, Time: date}
+	return Birthday{day: day, monthName: month, Time: date}
 }
 
-func (b Birthday) ToString() string {
-	return fmt.Sprintf("%-2d %s", b.day, b.month)
+func (b Birthday) ToString(maxMonthLength int) string {
+	return fmt.Sprintf("%-2d %-*s", b.day, maxMonthLength, b.monthName)
 }
 
-func (b Birthday) GetMonth() string {
-	return b.month
+func (b Birthday) MonthName() string {
+	return b.monthName
 }
 
 func (b Birthday) GetDay() int {

@@ -11,7 +11,7 @@ type Users struct {
 
 //---------------------------------------------------------------------------------------------------------------------
 
-func (u *Users) GetAllUsers() []*User {
+func (u *Users) AllUsers() []*User {
 	return u.users
 }
 
@@ -47,20 +47,31 @@ func (u *Users) GetMaxNameLength() int {
 	return result
 }
 
-func (u *Users) GetNextBirthdayUsers(n int) ([]*User, error) {
-	if n > len(u.GetAllUsers()) {
-		n = len(u.GetAllUsers())
+func (u *Users) GetMaxMonthLength() int {
+	var result = 0
+	for _, user := range u.users {
+		if utf8.RuneCountInString(user.Birthday().MonthName()) > result {
+			result = utf8.RuneCountInString(user.Birthday().MonthName())
+		}
+	}
+	return result
+}
+
+func (u *Users) GetNextBirthdayUsers(n int) (*Users, error) {
+	if n > len(u.AllUsers()) {
+		n = len(u.AllUsers())
 	}
 
-	var result []*User
+	var users []*User
 
 	sortedUsers := u.sortByDaysBeforeBirthday()
 
 	for i := 0; i < n; i++ {
-		user := (sortedUsers.GetAllUsers())[i]
-		result = append(result, user)
+		user := (sortedUsers.AllUsers())[i]
+		users = append(users, user)
 	}
 
+	result := &Users{users: users}
 	return result, nil
 }
 

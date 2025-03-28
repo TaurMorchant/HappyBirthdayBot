@@ -19,8 +19,8 @@ func ParseNameAndBirthdate(input string) (name string, birthdate time.Time, err 
 	if name == "" {
 		return "", time.Time{}, errors.New("Ты забыл задать имя")
 	}
-	if utf8.RuneCountInString(name) > 24 {
-		return "", time.Time{}, errors.New("Не наглей! Максимальная длина имени 24 символа!")
+	if utf8.RuneCountInString(name) > 10 {
+		return "", time.Time{}, errors.New("Не наглей! Максимальная длина имени 10 символов!")
 	}
 
 	dateStr := strings.TrimSpace(parts[1])

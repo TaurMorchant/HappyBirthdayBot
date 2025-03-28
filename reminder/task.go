@@ -32,7 +32,7 @@ func StartReminderTask(bot *bot.Bot) {
 func isBirthdayComingUp(bot *bot.Bot) {
 	users := sheets.Read()
 	isUpdateNeeded := false
-	for _, user := range users.GetAllUsers() {
+	for _, user := range users.AllUsers() {
 		if user.DaysBeforeBirthday() == 0 && !user.BirthdayGreetings {
 			handleBirthday(bot, user)
 			isUpdateNeeded = true

@@ -69,7 +69,7 @@ func Read() usr.Users {
 func Write(users *usr.Users) {
 	startTime := time.Now().Unix()
 	var values [][]interface{}
-	for _, user := range users.GetAllUsers() {
+	for _, user := range users.AllUsers() {
 		userRow := prepareUserRow(user)
 		values = append(values, userRow)
 	}
