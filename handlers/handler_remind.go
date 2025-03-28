@@ -4,6 +4,7 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"happy-birthday-bot/bot"
+	res "happy-birthday-bot/resources"
 	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
 )
@@ -28,7 +29,7 @@ func (h RemindHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 		msg += formatterStr(user, maxNameLength) + "\n"
 	}
 	msg += "```"
-	bot.Send(update.Message.Chat.ID, msg)
+	bot.SendWithPic(update.Message.Chat.ID, msg, res.Many_of_cats, nil, false)
 
 	return nil
 }

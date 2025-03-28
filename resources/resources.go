@@ -15,10 +15,15 @@ var templateFS embed.FS
 type ImageKey string
 
 const (
-	Vjuh         ImageKey = "img/cats/vjuh.jpg"
-	Many_of_cats ImageKey = "img/cats/many_of_cats.jpg"
-	Cool_cat     ImageKey = "img/cats/cool_cat"
-	Sad_cat      ImageKey = "img/cats/sad_cat"
+	Vjuh              ImageKey = "img/cats/vjuh"
+	Many_of_cats      ImageKey = "img/cats/many_cats"
+	Cool_cat          ImageKey = "img/cats/cool_cat"
+	Sad_cat           ImageKey = "img/cats/sad_cat"
+	Do_not_understand ImageKey = "img/cats/do_not_understand"
+	Do_not_scream     ImageKey = "img/cats/do_not_scream"
+	Suspicious_cat    ImageKey = "img/cats/suspicious_cat"
+	Wishlist          ImageKey = "img/cats/wishlist"
+	Angry_cats        ImageKey = "img/cats/angry_cats"
 )
 
 func ReadFile() {

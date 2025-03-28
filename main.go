@@ -6,6 +6,7 @@ import (
 	"happy-birthday-bot/bot"
 	"happy-birthday-bot/handlers"
 	"happy-birthday-bot/reminder"
+	res "happy-birthday-bot/resources"
 	"happy-birthday-bot/restrictions"
 	"io"
 	"log"
@@ -166,7 +167,7 @@ func handleCallback(bot *bot.Bot, update tgbotapi.Update) {
 
 	if callbackElement, ok := handlers.WaitingForCallbackHandlers.Get(messageId); ok {
 		if callbackElement.UserId != userID {
-			bot.Send(chatId, "Это не для тебя кнопки, не трогай!")
+			bot.SendWithPic(chatId, "Это не для тебя кнопки, не трогай!", res.Angry_cats, nil, false)
 			return
 		} else {
 			err := callbackElement.Handler.HandleCallback(bot, update)

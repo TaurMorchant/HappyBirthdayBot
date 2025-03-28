@@ -21,17 +21,11 @@ func (b *Bot) SendWithForceReply(chatId int64, msg string) *tgbotapi.Message {
 	return b.sendInternal(message)
 }
 
-func (b *Bot) SendWithKeyboard(chatId int64, msg string, keyboard tgbotapi.InlineKeyboardMarkup) *tgbotapi.Message {
-	message := prepareMessage(chatId, msg)
-	message.ReplyMarkup = keyboard
-	return b.sendInternal(message)
-}
-
-func (b *Bot) SendWithPic(chatId int64, msg string, imageKey res.ImageKey, keyboard *tgbotapi.InlineKeyboardMarkup) *tgbotapi.Message {
+func (b *Bot) SendWithPic(chatId int64, msg string, imageKey res.ImageKey, keyboard *tgbotapi.InlineKeyboardMarkup, forceReply bool) *tgbotapi.Message {
 	file, err := res.GetImage(imageKey)
 	if err != nil {
 		log.Println("Cannot get image", err)
-		return b.Send(chatId, msg)
+		return b.sendWithKeyboard(chatId, msg, keyboard)
 	} else {
 		photo := tgbotapi.FileBytes{
 			Name:  string(imageKey),
@@ -44,12 +38,23 @@ func (b *Bot) SendWithPic(chatId int64, msg string, imageKey res.ImageKey, keybo
 		if keyboard != nil {
 			message.ReplyMarkup = keyboard
 		}
+		if forceReply {
+			message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true}
+		}
 
 		return b.sendInternal(message)
 	}
 }
 
 //----------------------------------------------------------------------------------------
+
+func (b *Bot) sendWithKeyboard(chatId int64, msg string, keyboard *tgbotapi.InlineKeyboardMarkup) *tgbotapi.Message {
+	message := prepareMessage(chatId, msg)
+	if keyboard != nil {
+		message.ReplyMarkup = keyboard
+	}
+	return b.sendInternal(message)
+}
 
 func prepareMessage(chatId int64, str string) *tgbotapi.MessageConfig {
 	message := tgbotapi.NewMessage(chatId, str)
