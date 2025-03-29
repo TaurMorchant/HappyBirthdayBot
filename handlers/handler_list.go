@@ -2,7 +2,7 @@ package handlers
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"happy-birthday-bot/bot"
+	"happy-birthday-bot/mybot"
 	res "happy-birthday-bot/resources"
 	"happy-birthday-bot/sheets"
 	"log"
@@ -11,7 +11,7 @@ import (
 type ListHandler struct {
 }
 
-func (h ListHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
+func (h ListHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	log.Printf("Handle list command")
 	chatID := update.Message.Chat.ID
 
@@ -32,10 +32,10 @@ func (h ListHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	return nil
 }
 
-func (h ListHandler) HandleReply(*bot.Bot, tgbotapi.Update) error {
+func (h ListHandler) HandleReply(*mybot.Bot, tgbotapi.Update) error {
 	return nil
 }
 
-func (h ListHandler) HandleCallback(*bot.Bot, tgbotapi.Update) error {
+func (h ListHandler) HandleCallback(*mybot.Bot, tgbotapi.Update) error {
 	return nil
 }

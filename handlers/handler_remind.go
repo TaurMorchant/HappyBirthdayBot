@@ -3,7 +3,7 @@ package handlers
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"happy-birthday-bot/bot"
+	"happy-birthday-bot/mybot"
 	res "happy-birthday-bot/resources"
 	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
@@ -15,7 +15,7 @@ type RemindHandler struct {
 
 const numberOfNames = 3
 
-func (h RemindHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
+func (h RemindHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	users := sheets.Read()
 
 	nextBirthdayUsers, err := users.GetNextBirthdayUsers(numberOfNames)
@@ -67,10 +67,10 @@ func getDaysWord(n int) string {
 	}
 }
 
-func (h RemindHandler) HandleReply(*bot.Bot, tgbotapi.Update) error {
+func (h RemindHandler) HandleReply(*mybot.Bot, tgbotapi.Update) error {
 	return nil
 }
 
-func (h RemindHandler) HandleCallback(*bot.Bot, tgbotapi.Update) error {
+func (h RemindHandler) HandleCallback(*mybot.Bot, tgbotapi.Update) error {
 	return nil
 }

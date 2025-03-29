@@ -3,7 +3,7 @@ package handlers
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"happy-birthday-bot/bot"
+	"happy-birthday-bot/mybot"
 	"happy-birthday-bot/resources"
 	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
@@ -13,7 +13,7 @@ import (
 type WishlistHandler struct {
 }
 
-func (h WishlistHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
+func (h WishlistHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
 	messageID := update.Message.MessageID
@@ -45,7 +45,7 @@ func (h WishlistHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	return nil
 }
 
-func (h WishlistHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
+func (h WishlistHandler) HandleReply(bot *mybot.Bot, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
 
@@ -61,7 +61,7 @@ func (h WishlistHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error
 	return nil
 }
 
-func (h WishlistHandler) HandleCallback(bot *bot.Bot, update tgbotapi.Update) error {
+func (h WishlistHandler) HandleCallback(bot *mybot.Bot, update tgbotapi.Update) error {
 	log.Println("Handle callback for WishlistHandler")
 	chatID := update.CallbackQuery.Message.Chat.ID
 	userID := update.CallbackQuery.From.ID

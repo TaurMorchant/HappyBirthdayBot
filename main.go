@@ -3,9 +3,8 @@ package main
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"happy-birthday-bot/bot"
 	"happy-birthday-bot/handlers"
-	"happy-birthday-bot/reminder"
+	"happy-birthday-bot/mybot"
 	res "happy-birthday-bot/resources"
 	"happy-birthday-bot/restrictions"
 	"io"
@@ -26,16 +25,10 @@ func main() {
 		}
 	}(file)
 
-	hapBirBot := registerBot()
+	bot := mybot.Register()
 
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 10
-	updates := hapBirBot.GetUpdatesChan(u)
-
-	reminder.StartReminderTask(hapBirBot)
-
-	for update := range updates {
-		handleUpdate(hapBirBot, update)
+	for update := range bot.GetUpdatesChan() {
+		handleUpdate(bot, update)
 	}
 }
 
@@ -50,37 +43,7 @@ func configureLogger() *os.File {
 	return file
 }
 
-func registerBot() *bot.Bot {
-	token := os.Getenv("TELEGRAM_BOT_TOKEN")
-	if token == "" {
-		log.Panic("TELEGRAM_BOT_TOKEN environment variable not set")
-	}
-	tgbot, err := tgbotapi.NewBotAPI(token)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	//bot.Debug = true
-
-	commands := []tgbotapi.BotCommand{
-		{Command: handlers.List, Description: "Все дни рождения"},
-		{Command: handlers.Join, Description: "Присоединиться к программе"},
-		{Command: handlers.Wishlist, Description: "Настроить свой Wishlist"},
-		{Command: handlers.Reminders, Description: "Ближайшие дни рождения"},
-		{Command: handlers.Exit, Description: "Выйти из программы"},
-	}
-
-	_, err = tgbot.Request(tgbotapi.SetMyCommandsConfig{Commands: commands})
-	if err != nil {
-		log.Panic(err)
-	}
-
-	log.Printf("Authorized on account %s", tgbot.Self.UserName)
-
-	return &bot.Bot{BotAPI: *tgbot}
-}
-
-func handleUpdate(bot *bot.Bot, update tgbotapi.Update) {
+func handleUpdate(bot *mybot.Bot, update tgbotapi.Update) {
 	defer handlePanic(bot, update)
 
 	if update.CallbackQuery != nil {
@@ -114,7 +77,7 @@ func handleUpdate(bot *bot.Bot, update tgbotapi.Update) {
 	}
 }
 
-func notRestricted(bot *bot.Bot, update tgbotapi.Update) bool {
+func notRestricted(bot *mybot.Bot, update tgbotapi.Update) bool {
 	if !restrictions.IsUserAllowed(update.Message.From.ID) {
 		msg := fmt.Sprintf("Прости %s, мне запрещено с тобой общаться!", update.Message.From.UserName)
 		bot.SendPic(update.Message.Chat.ID, msg, res.Error)
@@ -130,7 +93,7 @@ func notRestricted(bot *bot.Bot, update tgbotapi.Update) bool {
 	return true
 }
 
-func handlePanic(bot *bot.Bot, update tgbotapi.Update) {
+func handlePanic(bot *mybot.Bot, update tgbotapi.Update) {
 	if p := recover(); p != nil {
 		log.Println("[PANIC] Panic was catch: ", p)
 		log.Println(string(debug.Stack()))
@@ -147,7 +110,7 @@ func resolveChatId(update tgbotapi.Update) int64 {
 	}
 }
 
-func handleReply(bot *bot.Bot, update tgbotapi.Update) {
+func handleReply(bot *mybot.Bot, update tgbotapi.Update) {
 	log.Println("Handle reply")
 
 	chatID := update.Message.Chat.ID
@@ -166,7 +129,7 @@ func handleReply(bot *bot.Bot, update tgbotapi.Update) {
 	}
 }
 
-func handleCallback(bot *bot.Bot, update tgbotapi.Update) {
+func handleCallback(bot *mybot.Bot, update tgbotapi.Update) {
 	log.Println("Handle callback")
 
 	chatId := update.CallbackQuery.Message.Chat.ID
@@ -194,14 +157,14 @@ func handleCallback(bot *bot.Bot, update tgbotapi.Update) {
 	removeInlineButtons(bot, update)
 }
 
-func removeButtonAnimation(bot *bot.Bot, update tgbotapi.Update) {
+func removeButtonAnimation(bot *mybot.Bot, update tgbotapi.Update) {
 	callbackCfg := tgbotapi.NewCallback(update.CallbackQuery.ID, "")
 	if _, err := bot.Request(callbackCfg); err != nil {
 		log.Panic("Ошибка при обработке callback:", err)
 	}
 }
 
-func removeInlineButtons(bot *bot.Bot, update tgbotapi.Update) {
+func removeInlineButtons(bot *mybot.Bot, update tgbotapi.Update) {
 	editMsg := tgbotapi.NewEditMessageReplyMarkup(
 		update.CallbackQuery.Message.Chat.ID,
 		update.CallbackQuery.Message.MessageID,

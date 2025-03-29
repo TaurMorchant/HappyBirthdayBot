@@ -2,16 +2,17 @@ package handlers
 
 import (
 	"happy-birthday-bot/cache"
+	"happy-birthday-bot/mybot"
 	"time"
 )
 
 var Handlers = map[string]IHandler{
-	Start:     &StartHandler{},
-	Join:      &JoinHandler{},
-	Exit:      &ExitHandler{},
-	List:      &ListHandler{},
-	Reminders: &RemindHandler{},
-	Wishlist:  &WishlistHandler{},
+	mybot.Start:     &StartHandler{},
+	mybot.Join:      &JoinHandler{},
+	mybot.Exit:      &ExitHandler{},
+	mybot.List:      &ListHandler{},
+	mybot.Reminders: &RemindHandler{},
+	mybot.Wishlist:  &WishlistHandler{},
 }
 
 type CallbackElement struct {

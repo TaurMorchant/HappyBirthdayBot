@@ -2,8 +2,8 @@ package handlers
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"happy-birthday-bot/bot"
 	"happy-birthday-bot/date"
+	"happy-birthday-bot/mybot"
 	res "happy-birthday-bot/resources"
 	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
@@ -14,7 +14,7 @@ import (
 type JoinHandler struct {
 }
 
-func (h JoinHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
+func (h JoinHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	log.Printf("handle join command")
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
@@ -33,7 +33,7 @@ func (h JoinHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	return nil
 }
 
-func (h JoinHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
+func (h JoinHandler) HandleReply(bot *mybot.Bot, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
 
@@ -59,6 +59,6 @@ func (h JoinHandler) HandleReply(bot *bot.Bot, update tgbotapi.Update) error {
 	return nil
 }
 
-func (h JoinHandler) HandleCallback(*bot.Bot, tgbotapi.Update) error {
+func (h JoinHandler) HandleCallback(*mybot.Bot, tgbotapi.Update) error {
 	return nil
 }

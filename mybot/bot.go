@@ -1,13 +1,46 @@
-package bot
+package mybot
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"happy-birthday-bot/resources"
 	"log"
+	"os"
 )
 
 type Bot struct {
 	tgbotapi.BotAPI
+}
+
+func Register() *Bot {
+	token := os.Getenv("TELEGRAM_BOT_TOKEN")
+	if token == "" {
+		log.Panic("TELEGRAM_BOT_TOKEN environment variable not set")
+	}
+	tgbot, err := tgbotapi.NewBotAPI(token)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	//bot.Debug = true
+
+	_, err = tgbot.Request(tgbotapi.SetMyCommandsConfig{Commands: Commands})
+	if err != nil {
+		log.Panic(err)
+	}
+
+	log.Printf("Authorized on account %s", tgbot.Self.UserName)
+
+	result := &Bot{BotAPI: *tgbot}
+
+	StartReminderTask(result)
+
+	return result
+}
+
+func (b *Bot) GetUpdatesChan() tgbotapi.UpdatesChannel {
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 10
+	return b.BotAPI.GetUpdatesChan(u)
 }
 
 func (b *Bot) SendText(chatId int64, text string) *tgbotapi.Message {

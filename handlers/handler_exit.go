@@ -2,7 +2,7 @@ package handlers
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"happy-birthday-bot/bot"
+	"happy-birthday-bot/mybot"
 	res "happy-birthday-bot/resources"
 	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
@@ -15,7 +15,7 @@ type ExitHandler struct {
 const okButton = "ok"
 const cancelButton = "cancel"
 
-func (h ExitHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
+func (h ExitHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
 
@@ -40,11 +40,11 @@ func (h ExitHandler) Handle(bot *bot.Bot, update tgbotapi.Update) error {
 	return nil
 }
 
-func (h ExitHandler) HandleReply(*bot.Bot, tgbotapi.Update) error {
+func (h ExitHandler) HandleReply(*mybot.Bot, tgbotapi.Update) error {
 	return nil
 }
 
-func (h ExitHandler) HandleCallback(bot *bot.Bot, update tgbotapi.Update) error {
+func (h ExitHandler) HandleCallback(bot *mybot.Bot, update tgbotapi.Update) error {
 	log.Println("Handle callback for ExitHandler")
 	chatID := update.CallbackQuery.Message.Chat.ID
 	userID := update.CallbackQuery.From.ID
