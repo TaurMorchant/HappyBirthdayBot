@@ -29,10 +29,44 @@ func TestBirthday_ToString(t *testing.T) {
 			b := Birthday{
 				day:       tt.fields.day,
 				monthName: tt.fields.monthName,
-				Time:      tt.fields.Time,
+				//Time:      tt.fields.Time,
 			}
-			if got := b.ToString(tt.args.maxMonthLength); got != tt.want {
-				t.Errorf("ToString() = %v, want %v", got, tt.want)
+			if got := b.ToStringWithFormatting(tt.args.maxMonthLength); got != tt.want {
+				t.Errorf("ToStringWithFormatting() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestParseBirthday(t *testing.T) {
+	type args struct {
+		input string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    Birthday
+		wantErr bool
+	}{
+		{name: "1", args: args{"sdfdsfsfsdfsd"}, want: Birthday{}, wantErr: true},
+		{name: "2", args: args{"11 января"}, want: Birthday{day: 11, monthName: "января"}, wantErr: false},
+		{name: "3", args: args{"  11 января   "}, want: Birthday{day: 11, monthName: "января"}, wantErr: false},
+		{name: "4", args: args{"  11 январь   "}, want: Birthday{}, wantErr: true},
+		{name: "5", args: args{"  35 января   "}, want: Birthday{}, wantErr: true},
+		{name: "6", args: args{"  15    февраля   "}, want: Birthday{day: 15, monthName: "февраля"}, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ParseBirthday(tt.args.input)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ParseBirthday() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got.day != tt.want.day {
+				t.Errorf("ParseBirthday() day = %v, want %v", got.day, tt.want.day)
+			}
+			if got.monthName != tt.want.monthName {
+				t.Errorf("ParseBirthday() monthName = %v, want %v", got.day, tt.want.day)
 			}
 		})
 	}

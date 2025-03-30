@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/exp/slices"
 	"happy-birthday-bot/date"
+	"log"
 	"testing"
 	"time"
 )
@@ -19,9 +20,9 @@ func Test_GetMaxNameLength(t *testing.T) {
 
 func Test_sort(t *testing.T) {
 	users := Users{}
-	user1 := User{Name: "1", birthday: date.Birthday{Time: time.Date(1991, 11, 4, 0, 0, 0, 0, time.UTC)}}
-	user2 := User{Name: "2", birthday: date.Birthday{Time: time.Date(1991, 12, 5, 0, 0, 0, 0, time.UTC)}}
-	user3 := User{Name: "3", birthday: date.Birthday{Time: time.Date(1991, 5, 7, 0, 0, 0, 0, time.UTC)}}
+	user1 := User{Name: "1", birthDay: date.ToBirthday(time.Date(1991, 11, 4, 0, 0, 0, 0, time.UTC))}
+	user2 := User{Name: "2", birthDay: date.ToBirthday(time.Date(1991, 12, 5, 0, 0, 0, 0, time.UTC))}
+	user3 := User{Name: "3", birthDay: date.ToBirthday(time.Date(1991, 5, 7, 0, 0, 0, 0, time.UTC))}
 	users.Add(&user1)
 	users.Add(&user2)
 	users.Add(&user3)
@@ -34,7 +35,7 @@ func Test_sort(t *testing.T) {
 }
 
 func Test_sortByDaysBeforeBirthday(t *testing.T) {
-	currentDate := time.Date(1991, 5, 1, 0, 0, 0, 0, time.UTC)
+	currentDate := time.Date(time.Now().Year(), 5, 1, 0, 0, 0, 0, time.UTC)
 
 	users := Users{}
 	user1 := User{Name: "1"}
@@ -53,15 +54,21 @@ func Test_sortByDaysBeforeBirthday(t *testing.T) {
 	users.Add(&user4)
 	users.Add(&user5)
 
+	log.Println("before ", users)
+
 	result := users.sortByDaysBeforeBirthday()
 
+	log.Println("after ", result)
+
 	expected := []*User{&user3, &user4, &user5, &user1, &user2}
+
+	log.Println("expected ", expected)
 
 	assert.True(t, slices.Equal(expected, result.AllUsers()))
 }
 
 func Test_GetNextBirthdayUsers_1(t *testing.T) {
-	currentDate := time.Date(1991, 5, 1, 0, 0, 0, 0, time.UTC)
+	currentDate := time.Date(time.Now().Year(), 5, 1, 0, 0, 0, 0, time.UTC)
 
 	users := Users{}
 	user1 := User{Name: "1"}
@@ -88,7 +95,7 @@ func Test_GetNextBirthdayUsers_1(t *testing.T) {
 }
 
 func Test_GetNextBirthdayUsers_2(t *testing.T) {
-	currentDate := time.Date(1991, 11, 1, 0, 0, 0, 0, time.UTC)
+	currentDate := time.Date(time.Now().Year(), 11, 1, 0, 0, 0, 0, time.UTC)
 
 	users := Users{}
 	user1 := User{Name: "1"}
@@ -115,7 +122,7 @@ func Test_GetNextBirthdayUsers_2(t *testing.T) {
 }
 
 func Test_GetNextBirthdayUsers_3(t *testing.T) {
-	currentDate := time.Date(1991, 5, 1, 0, 0, 0, 0, time.UTC)
+	currentDate := time.Date(time.Now().Year(), 5, 1, 0, 0, 0, 0, time.UTC)
 
 	users := Users{}
 	user1 := User{Name: "1"}

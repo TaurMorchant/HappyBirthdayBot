@@ -50,8 +50,8 @@ func (u *Users) GetMaxNameLength() int {
 func (u *Users) GetMaxMonthLength() int {
 	var result = 0
 	for _, user := range u.users {
-		if utf8.RuneCountInString(user.Birthday().MonthName()) > result {
-			result = utf8.RuneCountInString(user.Birthday().MonthName())
+		if utf8.RuneCountInString(user.BirthDay().MonthName()) > result {
+			result = utf8.RuneCountInString(user.BirthDay().MonthName())
 		}
 	}
 	return result
@@ -79,7 +79,7 @@ func (u *Users) GetNextBirthdayUsers(n int) (*Users, error) {
 
 func (u *Users) sort() {
 	sort.Slice(u.users, func(i, j int) bool {
-		return u.users[i].birthday.Time.Before(u.users[j].birthday.Time)
+		return u.users[i].birthDay.CurrentYear().Before(u.users[j].birthDay.CurrentYear())
 	})
 }
 

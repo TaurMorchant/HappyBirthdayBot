@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"happy-birthday-bot/date"
 	"happy-birthday-bot/mybot"
@@ -8,8 +9,12 @@ import (
 	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
 	"log"
+	"strings"
 	"time"
+	"unicode/utf8"
 )
+
+const Layout = "02.01.2006"
 
 type JoinHandler struct {
 }
@@ -26,7 +31,8 @@ func (h JoinHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 		return nil
 	}
 
-	msg := "Отлично! Ответь на это сообщение вот так:\n\n`<Твое имя>, <дата рождения в формате DD.MM.YYYY>`\n\nНапример:\n\n`Вася Пупкин, 25.03.1990`"
+	msg := "Отлично! Ответь на это сообщение вот так:\n\n`<Твое имя>, <Твоя дата рождения>`\n\n" +
+		"Например:\n\n`Вася Пупкин, 25.03`\n\nили\n\n`Вася Пупкин, 25 марта`"
 	bot.SendPicForceReply(chatID, msg, res.Waiting, messageID)
 
 	WaitingForReplyHandlers.Add(userID, h)
@@ -43,13 +49,13 @@ func (h JoinHandler) HandleReply(bot *mybot.Bot, update tgbotapi.Update) error {
 		return nil
 	}
 
-	name, birthdate, err := date.ParseNameAndBirthdate(update.Message.Text)
+	name, birthDay, err := parseNameAndBirthday(update.Message.Text)
 	if err != nil {
 		return err
 	}
 
 	user := usr.User{Id: usr.UserId(userID), Name: name}
-	user.SetBirthday(birthdate, time.Now())
+	user.SetBirthday2(birthDay, time.Now())
 
 	users.Add(&user)
 	sheets.Write(&users)
@@ -61,4 +67,45 @@ func (h JoinHandler) HandleReply(bot *mybot.Bot, update tgbotapi.Update) error {
 
 func (h JoinHandler) HandleCallback(*mybot.Bot, tgbotapi.Update) error {
 	return nil
+}
+
+//--------------------------------------------------------------------------------------------------
+
+func parseNameAndBirthday(input string) (string, date.Birthday, error) {
+	parts := strings.Split(input, ",")
+	if len(parts) != 2 {
+		return "", date.Birthday{}, errors.New("Я тебя не понимаю. Ответь в виде\n\n`<Твое имя>, <Твоя дата рождения>`")
+	}
+
+	name := strings.TrimSpace(parts[0])
+	if name == "" {
+		return "", date.Birthday{}, errors.New("Ты забыл задать имя")
+	}
+	if utf8.RuneCountInString(name) > 10 {
+		return "", date.Birthday{}, errors.New("Не наглей! Максимальная длина имени 10 символов!")
+	}
+
+	dateStr := strings.TrimSpace(parts[1])
+	if dateStr == "" {
+		return "", date.Birthday{}, errors.New("Ты забыл задать день рождения")
+	}
+	birthDay, err := parseDate(dateStr)
+	return name, birthDay, err
+}
+
+func parseDate(input string) (date.Birthday, error) {
+	birthdate, err := date.ParseBirthday(input)
+	if err == nil {
+		return birthdate, nil
+	} else {
+		dateTime, err := time.Parse(Layout, input)
+		if err != nil {
+			input = input + ".2000"
+			dateTime, err = time.Parse(Layout, input)
+			if err != nil {
+				return date.Birthday{}, errors.New("Не понимаю твою дату. Вот корректные примеры:\n\n`Вася Пупкин, 25.03`\n\nили\n\n`Вася Пупкин, 25 марта`")
+			}
+		}
+		return date.ToBirthday(dateTime), nil
+	}
 }

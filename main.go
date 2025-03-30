@@ -36,7 +36,7 @@ func configureLogger() *os.File {
 	fileName := fmt.Sprintf("happy_birthday_bot_%s.log", time.Now().Format("2006-01-02_15.04.05"))
 	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	multiWriter := io.MultiWriter(os.Stdout, file)
 	log.SetOutput(multiWriter)

@@ -12,8 +12,8 @@ func Test_SetBirthday(t *testing.T) {
 	user := User{}
 	user.SetBirthday(userDate, time.Now())
 
-	assert.Equal(t, 13, user.birthday.GetDay())
-	assert.Equal(t, "июня", user.birthday.MonthName())
+	assert.Equal(t, 13, user.birthDay.Day())
+	assert.Equal(t, "июня", user.birthDay.MonthName())
 }
 
 func Test_GetDaysBeforeBirthday_1(t *testing.T) {

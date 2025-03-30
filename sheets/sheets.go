@@ -29,13 +29,13 @@ func init() {
 	// Загружаем учетные данные из JSON-файла
 	data, err := os.ReadFile(credentialsFile)
 	if err != nil {
-		log.Fatalf("Не удалось прочитать файл ключа: %v", err)
+		log.Panicf("Не удалось прочитать файл ключа: %v", err)
 	}
 
 	// Настраиваем клиента
 	config, err := google.JWTConfigFromJSON(data, sheets.SpreadsheetsScope)
 	if err != nil {
-		log.Fatalf("Ошибка при настройке JWT: %v", err)
+		log.Panicf("Ошибка при настройке JWT: %v", err)
 	}
 
 	client := config.Client(ctx)
@@ -43,7 +43,7 @@ func init() {
 	// Подключаемся к API
 	srv, err = sheets.NewService(ctx, option.WithHTTPClient(client))
 	if err != nil {
-		log.Fatalf("Ошибка при создании сервиса: %v", err)
+		log.Panicf("Ошибка при создании сервиса: %v", err)
 	}
 }
 
@@ -52,7 +52,7 @@ func Read() usr.Users {
 	var result usr.Users
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetID, readRange).Do()
 	if err != nil {
-		log.Fatalf("Ошибка при чтении данных: %v", err)
+		log.Panicf("Ошибка при чтении данных: %v", err)
 	}
 
 	for _, row := range resp.Values {
@@ -81,11 +81,11 @@ func Write(users *usr.Users) {
 	// Записываем данные
 	_, err := srv.Spreadsheets.Values.Clear(spreadsheetID, readRange, &sheets.ClearValuesRequest{}).Do()
 	if err != nil {
-		log.Fatalf("Ошибка при удалении данных: %v", err)
+		log.Panicf("Ошибка при удалении данных: %v", err)
 	}
 	_, err = srv.Spreadsheets.Values.Update(spreadsheetID, writeRange, valueRange).ValueInputOption("RAW").Do()
 	if err != nil {
-		log.Fatalf("Ошибка при записи данных: %v", err)
+		log.Panicf("Ошибка при записи данных: %v", err)
 	}
 	diff := time.Now().Unix() - startTime
 	log.Println("Operation Write spent ", diff)
@@ -106,18 +106,18 @@ func readUser(row []interface{}) *usr.User {
 	birthdayGreetingStr := readRowValue(row, 6)
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		log.Fatalf("Ошибка при чтении ID. row: %s. Err: %s", row, err)
+		log.Panicf("Ошибка при чтении ID. row: %s. Err: %s", row, err)
 	}
-	dateTime, err := time.Parse(date.Layout, dateStr)
+	birthDay, err := date.ParseBirthday(dateStr)
 	if err != nil {
-		log.Fatalf("Ошибка при чтении date. row: %s. Err: %s", row, err)
+		log.Panicf("Ошибка при чтении date. row: %s. Err: %s", row, err)
 	}
 	reminder30days := parseBool(reminder30daysStr)
 	reminder15days := parseBool(reminder15daysStr)
 	birthdayGreeting := parseBool(birthdayGreetingStr)
 
 	result := &usr.User{Id: usr.UserId(id), Name: name, Wishlist: wishlist, Reminder30days: reminder30days, Reminder15days: reminder15days, BirthdayGreetings: birthdayGreeting}
-	result.SetBirthday(dateTime, time.Now())
+	result.SetBirthday2(birthDay, time.Now())
 
 	log.Println("read user: ", result)
 
@@ -140,5 +140,5 @@ func readRowValue(row []interface{}, i int) string {
 }
 
 func prepareUserRow(user *usr.User) []interface{} {
-	return []interface{}{user.Id, user.Name, date.FormatDate(user.Birthday().Time), user.Wishlist, user.Reminder30days, user.Reminder15days, user.BirthdayGreetings}
+	return []interface{}{user.Id, user.Name, user.BirthDay().ToString(), user.Wishlist, user.Reminder30days, user.Reminder15days, user.BirthdayGreetings}
 }
