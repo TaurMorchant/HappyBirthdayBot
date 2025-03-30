@@ -5,6 +5,7 @@ package restrictions
 import (
 	"fmt"
 	"github.com/magiconair/properties"
+	"happy-birthday-bot/chat"
 )
 
 var allowedUsers *properties.Properties
@@ -20,5 +21,10 @@ func IsUserAllowed(userId int64) bool {
 }
 
 func IsChatAllowed(chatId int64) bool {
+	for _, chat := range chat.BirthdayChats {
+		if chat.ChatId == chatId {
+			return true
+		}
+	}
 	return allowedChats.GetString(fmt.Sprintf("%d", chatId), "") != ""
 }

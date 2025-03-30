@@ -63,6 +63,19 @@ func (b *Bot) SendPicWithKeyboard(chatId int64, text string, imageKey res.ImageK
 	return b.sendWithOptions(chatId, text, imageKey, keyboard, 0)
 }
 
+func (b *Bot) PinMessage(chatId int64, messageId int) {
+	pinConfig := tgbotapi.PinChatMessageConfig{
+		ChatID:              chatId,
+		MessageID:           messageId,
+		DisableNotification: false, // Не показывать уведомление
+	}
+
+	_, err := b.BotAPI.Request(pinConfig)
+	if err != nil {
+		log.Println("[ERROR] Cannot pin message")
+	}
+}
+
 //----------------------------------------------------------------------------------------
 
 func (b *Bot) sendWithOptions(chatId int64, text string, imageKey res.ImageKey, keyboard *tgbotapi.InlineKeyboardMarkup, replyToMessageId int) *tgbotapi.Message {

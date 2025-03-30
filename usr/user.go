@@ -46,7 +46,7 @@ func (u *User) DaysBeforeBirthday() int {
 //--------------------------------------------------------------
 
 func (u *User) calculateDaysBeforeBirthday(timeNow time.Time) int {
-	duration := u.birthDay.CurrentYear().Sub(timeNow)
+	duration := timeNow.Sub(u.birthDay.CurrentYear())
 	days := int(duration.Hours() / 24)
 
 	if days >= 0 {

@@ -2,6 +2,7 @@ package res
 
 import (
 	"embed"
+	"encoding/csv"
 	"errors"
 	"io/fs"
 	"log"
@@ -45,6 +46,18 @@ func GetImage(imageKey ImageKey) ([]byte, bool) {
 		}
 		return result, true
 	}
+}
+
+func ReadCSV(filename string) ([][]string, error) {
+	file, err := templateFS.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+
+	return reader.ReadAll()
 }
 
 func getRandomImage(imageKey ImageKey) ([]byte, bool) {
