@@ -85,6 +85,7 @@ func notRestricted(bot *mybot.Bot, update tgbotapi.Update) bool {
 	}
 
 	if !restrictions.IsChatAllowed(update.Message.Chat.ID) {
+		log.Printf("Chat %d is not allowed!", update.Message.Chat.ID)
 		msg := fmt.Sprintf("Прости, мне запрещено общаться в этом чате!")
 		bot.SendPic(update.Message.Chat.ID, msg, res.Error)
 		return false

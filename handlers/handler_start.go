@@ -19,7 +19,8 @@ func (h StartHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	for _, command := range mybot.Commands {
 		msg += fmt.Sprintf("[/%s] — %s\n", command.Command, command.Description)
 	}
-	msg += "\n\nТак же я буду оповещать о приближающихся днях дождения и управлять чатиками для обсуждения подарков! Вся информация хранится в (таблице)[https://docs.google.com/spreadsheets/d/1fb5ssf4Mp8HZ9aAFAOox9byQGUHstRub_5ssOdDoNro/edit?usp=sharing]."
+	msg += "\n\nТак же я буду оповещать о приближающихся днях дождения и управлять чатиками для обсуждения подарков! " +
+		"Вся информация хранится в таблице https://docs.google.com/spreadsheets/d/1fb5ssf4Mp8HZ9aAFAOox9byQGUHstRub_5ssOdDoNro/edit?usp=sharing."
 	msg += "\n\nА еще я пощу котиков `:3`"
 
 	bot.SendPic(chatID, msg, res.Main)

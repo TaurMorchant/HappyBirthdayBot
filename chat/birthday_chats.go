@@ -9,6 +9,7 @@ import (
 
 type BirthdayChat struct {
 	UserId   int64
+	Name     string
 	ChatLink string
 	ChatId   int64
 }
@@ -22,8 +23,9 @@ func init() {
 	}
 	for _, row := range rows {
 		userIdStr := strings.TrimSpace(row[0])
-		chatLink := strings.TrimSpace(row[1])
-		chatIdStr := strings.TrimSpace(row[2])
+		name := strings.TrimSpace(row[1])
+		chatLink := strings.TrimSpace(row[2])
+		chatIdStr := strings.TrimSpace(row[3])
 		userId, err := strconv.ParseInt(userIdStr, 10, 64)
 		if err != nil {
 			log.Panic("Invalid userId", err)
@@ -32,7 +34,7 @@ func init() {
 		if err != nil {
 			log.Panic("Invalid chatId", err)
 		}
-		birthdayChat := BirthdayChat{userId, chatLink, chatId}
+		birthdayChat := BirthdayChat{userId, name, chatLink, chatId}
 		BirthdayChats = append(BirthdayChats, birthdayChat)
 	}
 }

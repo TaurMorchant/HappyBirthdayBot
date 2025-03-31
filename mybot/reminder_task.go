@@ -30,6 +30,7 @@ func StartReminderTask(bot *Bot) {
 
 func isBirthdayComingUp(bot *Bot) {
 	defer handlePanic(bot)
+	log.Println("Check is birthday coming up")
 	users := sheets.Read()
 	isUpdateNeeded := false
 	for _, user := range users.AllUsers() {
@@ -99,7 +100,7 @@ func handle30Days(bot *Bot, user *usr.User) {
 	if birthdayChat != nil {
 		msg += fmt.Sprintf("\n\nЕсли хочешь обсудить, что подарим, залетай в чат: %s", birthdayChat.ChatLink)
 	} else {
-		msg += fmt.Sprintf("\n\nНо кажется @morchant ещё не завел чатик для обсуждения! Ей, пните его кто-нибудь!")
+		msg += fmt.Sprintf("\n\nНо кажется @morchant ещё не завел чатик для обсуждения! Эй, пните его кто-нибудь!")
 	}
 	message := bot.SendPic(MainChatId, msg, res.Random)
 	bot.PinMessage(MainChatId, message.MessageID)
