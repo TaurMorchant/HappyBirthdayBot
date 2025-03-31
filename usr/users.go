@@ -79,7 +79,7 @@ func (u *Users) GetNextBirthdayUsers(n int) (*Users, error) {
 
 func (u *Users) sort() {
 	sort.Slice(u.users, func(i, j int) bool {
-		return u.users[i].birthDay.CurrentYear().Before(u.users[j].birthDay.CurrentYear())
+		return u.users[i].birthDay.CurrentYearBirthday().Before(u.users[j].birthDay.CurrentYearBirthday())
 	})
 }
 

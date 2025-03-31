@@ -93,3 +93,25 @@ func Test_FormattedString_2(t *testing.T) {
 
 	assert.Equal(t, "      Вася — 13 сентября", user.FormattedString(10, 8))
 }
+
+func Test_calculateDaysBetween(t *testing.T) {
+	type args struct {
+		time1 time.Time
+		time2 time.Time
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{name: "1", args: args{time1: time.Date(1999, time.April, 3, 0, 0, 0, 0, time.Local), time2: time.Date(1999, time.April, 3, 0, 0, 0, 0, time.Local)}, want: 0},
+		{name: "2", args: args{time1: time.Date(1999, time.April, 3, 0, 0, 0, 0, time.Local), time2: time.Date(1999, time.April, 4, 0, 0, 0, 0, time.Local)}, want: 1},
+		{name: "3", args: args{time1: time.Date(1999, time.April, 3, 0, 0, 0, 0, time.Local), time2: time.Date(1999, time.May, 3, 0, 0, 0, 0, time.Local)}, want: 30},
+		{name: "4", args: args{time1: time.Date(1999, time.April, 3, 0, 0, 0, 0, time.Local), time2: time.Date(2000, time.April, 2, 0, 0, 0, 0, time.Local)}, want: 365},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, calculateDaysBetween(tt.args.time1, tt.args.time2), "calculateDaysBetween(%v, %v)", tt.args.time1, tt.args.time2)
+		})
+	}
+}

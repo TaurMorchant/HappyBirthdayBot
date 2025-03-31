@@ -67,12 +67,12 @@ func (b *Bot) PinMessage(chatId int64, messageId int) {
 	pinConfig := tgbotapi.PinChatMessageConfig{
 		ChatID:              chatId,
 		MessageID:           messageId,
-		DisableNotification: false, // Не показывать уведомление
+		DisableNotification: false,
 	}
 
 	_, err := b.BotAPI.Request(pinConfig)
 	if err != nil {
-		log.Println("[ERROR] Cannot pin message")
+		log.Println("[ERROR] Cannot pin message", err)
 	}
 }
 

@@ -3,6 +3,7 @@ package usr
 import (
 	"fmt"
 	"happy-birthday-bot/date"
+	"log"
 	"time"
 )
 
@@ -46,7 +47,14 @@ func (u *User) DaysBeforeBirthday() int {
 //--------------------------------------------------------------
 
 func (u *User) calculateDaysBeforeBirthday(timeNow time.Time) int {
-	duration := timeNow.Sub(u.birthDay.CurrentYear())
+	return calculateDaysBetween(timeNow, u.birthDay.NextBirthday())
+}
+
+func calculateDaysBetween(time1 time.Time, time2 time.Time) int {
+	log.Printf("calculateDaysBetween: %v - %v", time1, time2)
+	time1 = time.Date(time1.Year(), time1.Month(), time1.Day(), 0, 0, 0, 0, time.Local)
+	log.Printf("calculateDaysBetween: %v - %v", time1, time2)
+	duration := time2.Sub(time1)
 	days := int(duration.Hours() / 24)
 
 	if days >= 0 {

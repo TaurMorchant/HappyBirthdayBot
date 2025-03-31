@@ -64,8 +64,17 @@ func ToBirthday(input time.Time) Birthday {
 	return Birthday{day: day, month: input.Month(), monthName: month}
 }
 
-func (b Birthday) CurrentYear() time.Time {
-	return time.Date(time.Now().Year(), b.month, b.day, 0, 0, 0, 0, time.UTC)
+func (b Birthday) CurrentYearBirthday() time.Time {
+	return time.Date(time.Now().Year(), b.month, b.day, 0, 0, 0, 0, time.Local)
+}
+
+func (b Birthday) NextBirthday() time.Time {
+	currentYearBirthday := b.CurrentYearBirthday()
+	if time.Now().Before(currentYearBirthday.Add(24 * time.Hour)) {
+		return currentYearBirthday
+	} else {
+		return time.Date(time.Now().Year()+1, b.month, b.day, 0, 0, 0, 0, time.Local)
+	}
 }
 
 func (b Birthday) ToString() string {

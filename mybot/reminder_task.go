@@ -8,9 +8,11 @@ import (
 	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
 	"log"
+	"runtime/debug"
 )
 
 const MainChatId = 287959887
+const VLLAChatId = 287959887
 const EveryDay = "* * 9 * * *"
 const Every10Sec = "*/10 * * * * *"
 
@@ -27,6 +29,7 @@ func StartReminderTask(bot *Bot) {
 }
 
 func isBirthdayComingUp(bot *Bot) {
+	defer handlePanic(bot)
 	users := sheets.Read()
 	isUpdateNeeded := false
 	for _, user := range users.AllUsers() {
@@ -60,6 +63,15 @@ func isBirthdayComingUp(bot *Bot) {
 	}
 }
 
+func handlePanic(bot *Bot) {
+	if p := recover(); p != nil {
+		log.Println("[PANIC] Panic was catch: ", p)
+		log.Println(string(debug.Stack()))
+		message := fmt.Sprintf("Поймана паника во время выполнения reminder task: %v", p)
+		bot.SendText(VLLAChatId, message)
+	}
+}
+
 func handleBirthday(bot *Bot, user *usr.User) {
 	msg := fmt.Sprintf("Ура! Сегодня день рождения отмечает '%s'!", user.Name)
 	bot.SendPic(MainChatId, msg, res.HappyBirthday)
@@ -75,8 +87,7 @@ func handle15Days(bot *Bot, user *usr.User) {
 	if chatLink != "" {
 		msg += fmt.Sprintf("\n\nЕсли ты всё ещё не присоединился к обсуждению подарка - самое время: %s", chatLink)
 	}
-	message := bot.SendPic(MainChatId, msg, res.Random)
-	bot.PinMessage(MainChatId, message.MessageID)
+	bot.SendPic(MainChatId, msg, res.Random)
 
 	user.Reminder15days = true
 	user.Reminder30days = true
@@ -93,18 +104,19 @@ func handle30Days(bot *Bot, user *usr.User) {
 	message := bot.SendPic(MainChatId, msg, res.Random)
 	bot.PinMessage(MainChatId, message.MessageID)
 
+	user.Reminder30days = true
+
 	if len(user.Wishlist) == 0 {
-		msg = fmt.Sprintf("Похоже `%s` не оставил виш лист :(", user.Name)
+		msg = fmt.Sprintf("Похоже `%s` не составил виш лист :(", user.Name)
 	} else {
 		msg = fmt.Sprintf("Вот такой вишлист написал `%s`:\n\n```\n%s\n```", user.Name, user.Wishlist)
 	}
 
 	birthdayChat = getBirthdayChat(user.Id)
 	if birthdayChat != nil {
-		bot.SendText(birthdayChat.ChatId, msg)
+		message = bot.SendPic(birthdayChat.ChatId, msg, res.Wishlist)
+		bot.PinMessage(birthdayChat.ChatId, message.MessageID)
 	}
-
-	user.Reminder30days = true
 }
 
 func getBirthdayChat(userId usr.UserId) *chat.BirthdayChat {
