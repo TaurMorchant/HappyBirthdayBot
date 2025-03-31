@@ -1,4 +1,4 @@
-package restrictions
+package properties
 
 //todo rename to properties?
 
@@ -6,14 +6,23 @@ import (
 	"fmt"
 	"github.com/magiconair/properties"
 	"happy-birthday-bot/chat"
+	res "happy-birthday-bot/resources"
 )
 
 var allowedUsers *properties.Properties
 var allowedChats *properties.Properties
 
 func init() {
-	allowedUsers = properties.MustLoadFile("allowedUsers.properties", properties.UTF8)
-	allowedChats = properties.MustLoadFile("allowedChats.properties", properties.UTF8)
+	allowedUsersFile, err := res.ReadFile("allowedUsers.properties")
+	if err != nil {
+		panic(err)
+	}
+	allowedUsers = properties.MustLoadReader(allowedUsersFile, properties.UTF8)
+	allowedChatsFile, err := res.ReadFile("allowedChats.properties")
+	if err != nil {
+		panic(err)
+	}
+	allowedChats = properties.MustLoadReader(allowedChatsFile, properties.UTF8)
 }
 
 func IsUserAllowed(userId int64) bool {

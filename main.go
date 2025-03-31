@@ -5,8 +5,8 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"happy-birthday-bot/handlers"
 	"happy-birthday-bot/mybot"
+	"happy-birthday-bot/properties"
 	res "happy-birthday-bot/resources"
-	"happy-birthday-bot/restrictions"
 	"io"
 	"log"
 	"os"
@@ -53,12 +53,12 @@ func handleUpdate(bot *mybot.Bot, update tgbotapi.Update) {
 		handleCallback(bot, update)
 		return
 	} else if update.Message != nil {
+		log.Println("[TRACE] update = ", *update.Message)
 		log.Println("[TRACE] update.Message.From.ID = ", update.Message.From.ID)
 		log.Println("[TRACE] update.Message.Chat.ID = ", update.Message.Chat.ID)
+		log.Println("[TRACE] update.Message.Text = ", update.Message.Text)
 
 		if notRestricted(bot, update) {
-			log.Printf("Принято сообщение: %s", update.Message.Text)
-
 			if update.Message.IsCommand() {
 				handler, ok := handlers.Handlers[update.Message.Command()]
 				if !ok {
@@ -78,13 +78,13 @@ func handleUpdate(bot *mybot.Bot, update tgbotapi.Update) {
 }
 
 func notRestricted(bot *mybot.Bot, update tgbotapi.Update) bool {
-	if !restrictions.IsUserAllowed(update.Message.From.ID) {
+	if !properties.IsUserAllowed(update.Message.From.ID) {
 		msg := fmt.Sprintf("Прости %s, мне запрещено с тобой общаться!", update.Message.From.UserName)
 		bot.SendPic(update.Message.Chat.ID, msg, res.Error)
 		return false
 	}
 
-	if !restrictions.IsChatAllowed(update.Message.Chat.ID) {
+	if !properties.IsChatAllowed(update.Message.Chat.ID) {
 		log.Printf("Chat %d is not allowed!", update.Message.Chat.ID)
 		msg := fmt.Sprintf("Прости, мне запрещено общаться в этом чате!")
 		bot.SendPic(update.Message.Chat.ID, msg, res.Error)
@@ -95,11 +95,19 @@ func notRestricted(bot *mybot.Bot, update tgbotapi.Update) bool {
 }
 
 func handlePanic(bot *mybot.Bot, update tgbotapi.Update) {
+	defer handleFinalPanic()
 	if p := recover(); p != nil {
 		log.Println("[PANIC] Panic was catch: ", p)
 		log.Println(string(debug.Stack()))
 		message := fmt.Sprintf("Случилась какая-то неведомая фигня, напиши @morchant об этом, пожалуйста")
 		bot.SendPic(resolveChatId(update), message, res.Error)
+	}
+}
+
+func handleFinalPanic() {
+	if p := recover(); p != nil {
+		log.Println("[PANIC] Final Panic was catch: ", p)
+		log.Println(string(debug.Stack()))
 	}
 }
 

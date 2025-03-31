@@ -60,6 +60,10 @@ func ReadCSV(filename string) ([][]string, error) {
 	return reader.ReadAll()
 }
 
+func ReadFile(filename string) (fs.File, error) {
+	return templateFS.Open(filename)
+}
+
 func getRandomImage(imageKey ImageKey) ([]byte, bool) {
 	files, err := templateFS.ReadDir(string(imageKey))
 	if err != nil {
