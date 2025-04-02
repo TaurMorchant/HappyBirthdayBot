@@ -1,7 +1,6 @@
-package chat
+package config
 
 import (
-	res "happy-birthday-bot/resources"
 	"log"
 	"strconv"
 	"strings"
@@ -17,7 +16,7 @@ type BirthdayChat struct {
 var BirthdayChats []BirthdayChat
 
 func init() {
-	rows, err := res.ReadCSV("birthdayChats.csv")
+	rows, err := readCSV("./configs/birthdayChats.csv")
 	if err != nil {
 		log.Panic("Cannot read birthdayChats.csv", err)
 	}

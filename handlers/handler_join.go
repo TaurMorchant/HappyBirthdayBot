@@ -27,7 +27,7 @@ func (h JoinHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 
 	users := sheets.Read()
 	if _, ok := users.Get(usr.UserId(userID)); ok {
-		bot.SendPic(chatID, "Ты уже зарегистрирован!", res.Cool)
+		bot.SendPic(chatID, "Ты уже зарегистрирован! 😎", res.Cool)
 		return nil
 	}
 
@@ -45,7 +45,7 @@ func (h JoinHandler) HandleReply(bot *mybot.Bot, update tgbotapi.Update) error {
 
 	users := sheets.Read()
 	if _, ok := users.Get(usr.UserId(userID)); ok {
-		bot.SendPic(chatID, "Ты уже зарегистрирован!", res.Cool)
+		bot.SendPic(chatID, "Ты уже зарегистрирован! 😎", res.Cool)
 		return nil
 	}
 
@@ -60,7 +60,7 @@ func (h JoinHandler) HandleReply(bot *mybot.Bot, update tgbotapi.Update) error {
 	users.Add(&user)
 	sheets.Write(&users)
 
-	bot.SendPic(chatID, "Поздравляю, теперь тебя отхеппибёздят!", res.Cool)
+	bot.SendPic(chatID, "Поздравляю, теперь тебя отхеппибёздят! 🥳", res.Cool)
 
 	return nil
 }

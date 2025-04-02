@@ -3,7 +3,7 @@ package mybot
 import (
 	"fmt"
 	"github.com/robfig/cron/v3"
-	"happy-birthday-bot/chat"
+	"happy-birthday-bot/config"
 	res "happy-birthday-bot/resources"
 	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
@@ -11,14 +11,12 @@ import (
 	"runtime/debug"
 )
 
-const MainChatId = 287959887
-const VLLAChatId = 287959887
-const EveryDay = "* * 9 * * *"
-const Every10Sec = "*/10 * * * * *"
+var MainChatId = config.GetInt64Property(config.MainChatIdProp)
+var AdminChatId = config.GetInt64Property(config.AdminChatIdProp)
 
 func StartReminderTask(bot *Bot) {
 	c := cron.New(cron.WithSeconds())
-	_, err := c.AddFunc(Every10Sec, func() {
+	_, err := c.AddFunc(config.GetStringProperty(config.ReminderTriggerCronProp), func() {
 		isBirthdayComingUp(bot)
 	})
 	if err != nil {
@@ -69,7 +67,7 @@ func handlePanic(bot *Bot) {
 		log.Println("[PANIC] Panic was catch: ", p)
 		log.Println(string(debug.Stack()))
 		message := fmt.Sprintf("Поймана паника во время выполнения reminder task: %v", p)
-		bot.SendText(VLLAChatId, message)
+		bot.SendText(AdminChatId, message)
 	}
 }
 
@@ -120,8 +118,8 @@ func handle30Days(bot *Bot, user *usr.User) {
 	}
 }
 
-func getBirthdayChat(userId usr.UserId) *chat.BirthdayChat {
-	for _, bdChat := range chat.BirthdayChats {
+func getBirthdayChat(userId usr.UserId) *config.BirthdayChat {
+	for _, bdChat := range config.BirthdayChats {
 		if bdChat.UserId == int64(userId) {
 			return &bdChat
 		}

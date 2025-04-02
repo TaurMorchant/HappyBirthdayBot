@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"happy-birthday-bot/config"
 	"happy-birthday-bot/handlers"
 	"happy-birthday-bot/mybot"
-	"happy-birthday-bot/properties"
 	res "happy-birthday-bot/resources"
 	"io"
 	"log"
@@ -78,13 +78,13 @@ func handleUpdate(bot *mybot.Bot, update tgbotapi.Update) {
 }
 
 func notRestricted(bot *mybot.Bot, update tgbotapi.Update) bool {
-	if !properties.IsUserAllowed(update.Message.From.ID) {
+	if !config.IsUserAllowed(update.Message.From.ID) {
 		msg := fmt.Sprintf("Прости %s, мне запрещено с тобой общаться!", update.Message.From.UserName)
 		bot.SendPic(update.Message.Chat.ID, msg, res.Error)
 		return false
 	}
 
-	if !properties.IsChatAllowed(update.Message.Chat.ID) {
+	if !config.IsChatAllowed(update.Message.Chat.ID) {
 		log.Printf("Chat %d is not allowed!", update.Message.Chat.ID)
 		msg := fmt.Sprintf("Прости, мне запрещено общаться в этом чате!")
 		bot.SendPic(update.Message.Chat.ID, msg, res.Error)

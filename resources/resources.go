@@ -2,7 +2,6 @@ package res
 
 import (
 	"embed"
-	"encoding/csv"
 	"errors"
 	"io/fs"
 	"log"
@@ -48,21 +47,21 @@ func GetImage(imageKey ImageKey) ([]byte, bool) {
 	}
 }
 
-func ReadCSV(filename string) ([][]string, error) {
-	file, err := templateFS.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
+//func ReadCSV(filename string) ([][]string, error) {
+//	file, err := templateFS.Open(filename)
+//	if err != nil {
+//		return nil, err
+//	}
+//	defer file.Close()
+//
+//	reader := csv.NewReader(file)
+//
+//	return reader.ReadAll()
+//}
 
-	reader := csv.NewReader(file)
-
-	return reader.ReadAll()
-}
-
-func ReadFile(filename string) (fs.File, error) {
-	return templateFS.Open(filename)
-}
+//func ReadFile(filename string) (fs.File, error) {
+//	return templateFS.Open(filename)
+//}
 
 func getRandomImage(imageKey ImageKey) ([]byte, bool) {
 	files, err := templateFS.ReadDir(string(imageKey))
