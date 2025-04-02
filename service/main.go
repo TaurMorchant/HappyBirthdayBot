@@ -53,7 +53,6 @@ func handleUpdate(bot *mybot.Bot, update tgbotapi.Update) {
 		handleCallback(bot, update)
 		return
 	} else if update.Message != nil {
-		log.Println("[TRACE] update = ", *update.Message)
 		log.Println("[TRACE] update.Message.From.ID = ", update.Message.From.ID)
 		log.Println("[TRACE] update.Message.Chat.ID = ", update.Message.Chat.ID)
 		log.Println("[TRACE] update.Message.Text = ", update.Message.Text)
@@ -99,7 +98,8 @@ func handlePanic(bot *mybot.Bot, update tgbotapi.Update) {
 	if p := recover(); p != nil {
 		log.Println("[PANIC] Panic was catch: ", p)
 		log.Println(string(debug.Stack()))
-		message := fmt.Sprintf("Случилась какая-то неведомая фигня, напиши @morchant об этом, пожалуйста")
+		message := fmt.Sprintf("Случилась какая-то неведомая фигня! 😱\n\n" +
+			"Напиши @morchant об этом, пожалуйста")
 		bot.SendPic(resolveChatId(update), message, res.Error)
 	}
 }

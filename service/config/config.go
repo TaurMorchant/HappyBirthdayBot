@@ -8,6 +8,8 @@ import (
 	"strconv"
 )
 
+const CONFIG_PATH_TMP = "../configs/"
+
 const MainChatIdProp = "mainChatId"
 const AdminChatIdProp = "adminChatId"
 const ReminderTriggerCronProp = "reminderTriggerCron"
@@ -17,9 +19,9 @@ var allowedChats *properties.Properties
 var applicationProperties *properties.Properties
 
 func init() {
-	allowedUsers = properties.MustLoadFile("./configs/allowedUsers.properties", properties.UTF8)
-	allowedChats = properties.MustLoadFile("./configs/allowedChats.properties", properties.UTF8)
-	applicationProperties = properties.MustLoadFile("./configs/application.properties", properties.UTF8)
+	allowedUsers = properties.MustLoadFile(CONFIG_PATH_TMP+"allowedUsers.properties", properties.UTF8)
+	allowedChats = properties.MustLoadFile(CONFIG_PATH_TMP+"allowedChats.properties", properties.UTF8)
+	applicationProperties = properties.MustLoadFile(CONFIG_PATH_TMP+"application.properties", properties.UTF8)
 }
 
 func IsUserAllowed(userId int64) bool {
