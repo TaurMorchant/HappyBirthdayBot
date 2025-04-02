@@ -32,7 +32,10 @@ var (
 )
 
 func GetImage(imageKey ImageKey) ([]byte, bool) {
-	log.Printf("[DEBUG] get image %s", imageKey)
+	log.Printf("[DEBUG] get image '%s'", imageKey)
+	if imageKey == NoPicture {
+		return nil, false
+	}
 	if isDir(imageKey) {
 		log.Printf("[DEBUG] it is directory")
 		return getRandomImage(imageKey)
@@ -47,30 +50,13 @@ func GetImage(imageKey ImageKey) ([]byte, bool) {
 	}
 }
 
-//func ReadCSV(filename string) ([][]string, error) {
-//	file, err := templateFS.Open(filename)
-//	if err != nil {
-//		return nil, err
-//	}
-//	defer file.Close()
-//
-//	reader := csv.NewReader(file)
-//
-//	return reader.ReadAll()
-//}
-
-//func ReadFile(filename string) (fs.File, error) {
-//	return templateFS.Open(filename)
-//}
-
 func getRandomImage(imageKey ImageKey) ([]byte, bool) {
 	files, err := templateFS.ReadDir(string(imageKey))
 	if err != nil {
-		log.Printf("[ERROR] get random image %s failed, err = %s", imageKey, err.Error())
+		log.Printf("[ERROR] read dir '%s' for random image, err = %v", imageKey, err.Error())
 		return nil, false
 	}
 
-	// Фильтруем только файлы (исключаем поддиректории)
 	var images []string
 	for _, file := range files {
 		if !file.IsDir() {

@@ -72,7 +72,8 @@ func handlePanic(bot *Bot) {
 }
 
 func handleBirthday(bot *Bot, user *usr.User) {
-	msg := fmt.Sprintf("Ура! Сегодня день рождения отмечает '%s'!", user.Name)
+	log.Printf("handleBirthday for user %v", user.Id)
+	msg := fmt.Sprintf("Ура! Сегодня день рождения отмечает `%s`!", user.Name)
 	bot.SendPic(MainChatId, msg, res.HappyBirthday)
 	user.BirthdayGreetings = true
 	user.Reminder15days = true
@@ -80,11 +81,11 @@ func handleBirthday(bot *Bot, user *usr.User) {
 }
 
 func handle15Days(bot *Bot, user *usr.User) {
+	log.Printf("handle15Days for user %v", user.Id)
 	birthdayChat := getBirthdayChat(user.Id)
-	chatLink := birthdayChat.ChatLink
 	msg := fmt.Sprintf("Хочу напомнить, что и двух недель не осталось до момента, когда родится `%s`!", user.Name)
-	if chatLink != "" {
-		msg += fmt.Sprintf("\n\nЕсли ты всё ещё не присоединился к обсуждению подарка - самое время: %s", chatLink)
+	if birthdayChat != nil {
+		msg += fmt.Sprintf("\n\nЕсли ты всё ещё не присоединился к обсуждению подарка - самое время: %s", birthdayChat.ChatLink)
 	}
 	bot.SendPic(MainChatId, msg, res.Random)
 
@@ -93,6 +94,7 @@ func handle15Days(bot *Bot, user *usr.User) {
 }
 
 func handle30Days(bot *Bot, user *usr.User) {
+	log.Printf("handle30Days for user %v", user.Id)
 	birthdayChat := getBirthdayChat(user.Id)
 	msg := fmt.Sprintf("Псс, ребята! Уже меньше, чем через месяц, `%s` отмечает свой день рождения! Самое время подумать о подарке!", user.Name)
 	if birthdayChat != nil {
