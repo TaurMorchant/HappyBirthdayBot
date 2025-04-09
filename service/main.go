@@ -50,6 +50,11 @@ func configureLogger() *os.File {
 func handleUpdate(bot *mybot.Bot, update tgbotapi.Update) {
 	defer handlePanic(bot, update)
 
+	if isExpired(update) {
+		log.Println("Update is expired")
+		return
+	}
+
 	if update.CallbackQuery != nil {
 		log.Println("[TRACE] update.CallbackQuery.From.ID = ", update.CallbackQuery.From.ID)
 		log.Println("[TRACE] update.CallbackQuery.Message.MessageID = ", update.CallbackQuery.Message.MessageID)
@@ -78,6 +83,17 @@ func handleUpdate(bot *mybot.Bot, update tgbotapi.Update) {
 			}
 		}
 	}
+}
+
+func isExpired(update tgbotapi.Update) bool {
+	currentTime := time.Now().Unix()
+	var messageTime int64
+	if update.CallbackQuery != nil {
+		messageTime = int64(update.CallbackQuery.Message.Date)
+	} else {
+		messageTime = int64(update.Message.Date)
+	}
+	return (currentTime - messageTime) > 10
 }
 
 func notRestricted(bot *mybot.Bot, update tgbotapi.Update) bool {
