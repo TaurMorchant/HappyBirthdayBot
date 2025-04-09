@@ -15,8 +15,8 @@ type BirthdayChat struct {
 
 var BirthdayChats []BirthdayChat
 
-func initBirthdayChats() {
-	rows, err := readCSV(CONFIG_PATH_TMP + "birthdayChats.csv")
+func initBirthdayChats(configsDir string) {
+	rows, err := readCSV(configsDir + "/birthdayChats.csv")
 	if err != nil {
 		log.Panic("Cannot read birthdayChats.csv", err)
 	}

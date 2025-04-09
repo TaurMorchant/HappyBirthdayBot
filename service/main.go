@@ -26,7 +26,9 @@ func main() {
 		}
 	}(file)
 
-	config.InitConfigs()
+	configsDir := getConfigsPath()
+
+	config.InitConfigs(configsDir)
 	sheets.InitSpreadsheetService()
 
 	bot := mybot.Register()
@@ -34,6 +36,18 @@ func main() {
 	for update := range bot.GetUpdatesChan() {
 		handleUpdate(bot, update)
 	}
+}
+
+func getConfigsPath() string {
+	if len(os.Args) < 2 {
+		fmt.Println("Укажите аргумент командной строки: путь до директории с конфигами")
+		os.Exit(1)
+	}
+
+	configsDir := os.Args[1]
+	log.Println("configsDir:", configsDir)
+
+	return configsDir
 }
 
 func configureLogger() *os.File {

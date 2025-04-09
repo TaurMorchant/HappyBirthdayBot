@@ -12,8 +12,6 @@ import (
 	"strconv"
 )
 
-const CONFIG_PATH_TMP = "../configs-test/"
-
 const MainChatIdProp = "mainChatId"
 const AdminChatIdProp = "adminChatId"
 const ReminderTriggerCronProp = "reminderTriggerCron"
@@ -25,13 +23,13 @@ var allowedChats *properties.Properties
 var applicationProperties *properties.Properties
 var spreadsheetConfig *jwt.Config
 
-func InitConfigs() {
-	allowedUsers = properties.MustLoadFile(CONFIG_PATH_TMP+"allowedUsers.properties", properties.UTF8)
-	allowedChats = properties.MustLoadFile(CONFIG_PATH_TMP+"allowedChats.properties", properties.UTF8)
-	applicationProperties = properties.MustLoadFile(CONFIG_PATH_TMP+"application.properties", properties.UTF8)
+func InitConfigs(configsDir string) {
+	allowedUsers = properties.MustLoadFile(configsDir+"/allowedUsers.properties", properties.UTF8)
+	allowedChats = properties.MustLoadFile(configsDir+"/allowedChats.properties", properties.UTF8)
+	applicationProperties = properties.MustLoadFile(configsDir+"/application.properties", properties.UTF8)
 
 	// Загружаем учетные данные из JSON-файла
-	data, err := os.ReadFile(CONFIG_PATH_TMP + "happybirthdaybot-454814-2dec5157295e.json")
+	data, err := os.ReadFile(configsDir + "/happybirthdaybot-454814-2dec5157295e.json")
 	if err != nil {
 		log.Panicf("Не удалось прочитать файл ключа: %v", err)
 	}
@@ -42,7 +40,7 @@ func InitConfigs() {
 		log.Panicf("Ошибка при настройке JWT: %v", err)
 	}
 
-	initBirthdayChats()
+	initBirthdayChats(configsDir)
 }
 
 func IsUserAllowed(userId int64) bool {
