@@ -26,8 +26,15 @@ func (h JoinHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	messageID := update.Message.MessageID
 
 	users := sheets.Read()
-	if _, ok := users.Get(usr.UserId(userID)); ok {
-		bot.SendPic(chatID, "Ты уже зарегистрирован! 😎", res.Cool)
+	if user, ok := users.Get(usr.UserId(userID)); ok {
+		msg := "Ты уже зарегистрирован! 😎\n\n"
+		if len(user.Wishlist) == 0 {
+			msg += "Хочешь задать свой вишлист? [/wishlist](/wishlist)"
+		} else {
+			msg += "Хочешь поменять свой вишлист? [/wishlist](/wishlist)"
+		}
+
+		bot.SendPic(chatID, msg, res.Cool)
 		return nil
 	}
 

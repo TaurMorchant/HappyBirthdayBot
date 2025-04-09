@@ -2,49 +2,39 @@ package sheets
 
 import (
 	"context"
-	"golang.org/x/oauth2/google"
+	"google.golang.org/api/option"
+	"google.golang.org/api/sheets/v4"
+	"happy-birthday-bot/config"
 	"happy-birthday-bot/date"
 	"happy-birthday-bot/usr"
 	"log"
-	"os"
 	"strconv"
 	"time"
-
-	"google.golang.org/api/option"
-	"google.golang.org/api/sheets/v4"
 )
 
-// Укажи путь к JSON-ключу
-const credentialsFile = "C:\\go_modules\\happy_birthday_bot\\happybirthdaybot-454814-2dec5157295e.json"
-const spreadsheetID = "1fb5ssf4Mp8HZ9aAFAOox9byQGUHstRub_5ssOdDoNro"
-const readRange = "Data!A2:G30"
-const writeRange = "Data!A2"
+var spreadsheetID string
+var readRange string
+var writeRange string
 
 var srv *sheets.Service
 
-func init() {
-	// Создаём контекст
+func InitSpreadsheetService() {
 	ctx := context.Background()
 
-	// Загружаем учетные данные из JSON-файла
-	data, err := os.ReadFile(credentialsFile)
-	if err != nil {
-		log.Panicf("Не удалось прочитать файл ключа: %v", err)
-	}
+	spreadsheetConfig := config.SpreadsheetConfig()
 
-	// Настраиваем клиента
-	config, err := google.JWTConfigFromJSON(data, sheets.SpreadsheetsScope)
-	if err != nil {
-		log.Panicf("Ошибка при настройке JWT: %v", err)
-	}
+	client := spreadsheetConfig.Client(ctx)
 
-	client := config.Client(ctx)
-
-	// Подключаемся к API
+	var err error
 	srv, err = sheets.NewService(ctx, option.WithHTTPClient(client))
 	if err != nil {
 		log.Panicf("Ошибка при создании сервиса: %v", err)
 	}
+
+	spreadsheetID = config.GetStringProperty(config.SpreadsheetIdProp)
+	spreadsheetList := config.GetStringProperty(config.SpreadsheetListProp)
+	readRange = spreadsheetList + "!A2:G30"
+	writeRange = spreadsheetList + "!A2"
 }
 
 func Read() usr.Users {

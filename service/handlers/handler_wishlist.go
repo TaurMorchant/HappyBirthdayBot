@@ -26,8 +26,8 @@ func (h WishlistHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 			bot.SendPicForceReply(chatID, msg, res.Wishlist, messageID)
 			WaitingForReplyHandlers.Add(userID, h)
 		} else {
-			msg := fmt.Sprintf("Вот так выглядит твой вишлист:\n\n```\n%s\n```\n"+
-				"Ты хочешь его поменять?", user.Wishlist)
+			msg := fmt.Sprintf("У тебя сейчас такой вишлист:\n\n```\n%s\n```\n"+
+				"Хочешь его поменять?", user.Wishlist)
 
 			inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 				tgbotapi.NewInlineKeyboardRow(
@@ -54,7 +54,7 @@ func (h WishlistHandler) HandleReply(bot *mybot.Bot, update tgbotapi.Update) err
 		user.Wishlist = update.Message.Text
 		sheets.Write(&users)
 
-		bot.SendPic(chatID, "Вжух, вишлист обновлён!", res.Vjuh)
+		bot.SendPic(chatID, "Вжух, вишлист обновлён! 👌", res.Vjuh)
 	} else {
 		log.Panicf("User with ID %d not found", usr.UserId(userID))
 	}

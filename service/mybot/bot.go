@@ -47,10 +47,6 @@ func (b *Bot) SendText(chatId int64, text string) *tgbotapi.Message {
 	return b.sendWithOptions(chatId, text, res.NoPicture, nil, 0)
 }
 
-//func (b *Bot) SendTextForceReply(chatId int64, text string, replyToMessageId int) *tgbotapi.Message {
-//	return b.sendWithOptions(chatId, text, res.NoPicture, nil, replyToMessageId)
-//}
-
 func (b *Bot) SendPic(chatId int64, text string, imageKey res.ImageKey) *tgbotapi.Message {
 	return b.sendWithOptions(chatId, text, imageKey, nil, 0)
 }
@@ -122,14 +118,6 @@ func (b *Bot) sendTextInternal(chatId int64, text string, keyboard *tgbotapi.Inl
 
 	return b.sendInternal(message)
 }
-
-//func (b *Bot) sendWithKeyboard(chatId int64, msg string, keyboard *tgbotapi.InlineKeyboardMarkup) *tgbotapi.Message {
-//	message := prepareMessage(chatId, msg)
-//	if keyboard != nil {
-//		message.ReplyMarkup = keyboard
-//	}
-//	return b.sendInternal(message)
-//}
 
 func prepareMessage(chatId int64, text string) *tgbotapi.MessageConfig {
 	message := tgbotapi.NewMessage(chatId, text)

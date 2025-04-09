@@ -4,7 +4,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/exp/slices"
 	"happy-birthday-bot/date"
-	"log"
 	"testing"
 	"time"
 )
@@ -54,15 +53,9 @@ func Test_sortByDaysBeforeBirthday(t *testing.T) {
 	users.Add(&user4)
 	users.Add(&user5)
 
-	log.Println("before ", users)
-
 	result := users.sortByDaysBeforeBirthday()
 
-	log.Println("after ", result)
-
 	expected := []*User{&user3, &user4, &user5, &user1, &user2}
-
-	log.Println("expected ", expected)
 
 	assert.True(t, slices.Equal(expected, result.AllUsers()))
 }

@@ -7,6 +7,7 @@ import (
 	"happy-birthday-bot/handlers"
 	"happy-birthday-bot/mybot"
 	res "happy-birthday-bot/resources"
+	"happy-birthday-bot/sheets"
 	"io"
 	"log"
 	"os"
@@ -24,6 +25,9 @@ func main() {
 			log.Println("Cannot close file!", err)
 		}
 	}(file)
+
+	config.InitConfigs()
+	sheets.InitSpreadsheetService()
 
 	bot := mybot.Register()
 

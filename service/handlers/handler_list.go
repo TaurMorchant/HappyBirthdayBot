@@ -15,7 +15,7 @@ func (h ListHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	log.Printf("Handle list command")
 	chatID := update.Message.Chat.ID
 
-	msg := "📅 Список всех участников:\n```\n"
+	msg := "📅 Вот список всех участников:\n```\n"
 
 	users := sheets.Read()
 	usersSlice := users.AllUsers()
