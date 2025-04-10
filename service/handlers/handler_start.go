@@ -20,7 +20,7 @@ func (h StartHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 		msg += fmt.Sprintf("[/%s] — %s\n", command.Command, command.Description)
 	}
 	msg += "\n\nТак же я буду оповещать о ближайших днях рождения и управлять чатиками для обсуждения подарков! " +
-		"Вся информация хранится в таблице [https://docs.google.com/spreadsheets/d/1fb5ssf4Mp8HZ9aAFAOox9byQGUHstRub_5ssOdDoNro/edit?usp=sharing]."
+		"Вся информация хранится в [таблице](https://docs.google.com/spreadsheets/d/1fb5ssf4Mp8HZ9aAFAOox9byQGUHstRub_5ssOdDoNro)."
 	msg += "\n\nА еще я пощу котиков `:3`"
 
 	bot.SendPic(chatID, msg, res.Main)
@@ -32,6 +32,6 @@ func (h StartHandler) HandleReply(*mybot.Bot, tgbotapi.Update) error {
 	return nil
 }
 
-func (h StartHandler) HandleCallback(*mybot.Bot, tgbotapi.Update) error {
+func (h StartHandler) HandleCallback(*mybot.Bot, tgbotapi.Update, CallbackElement) error {
 	return nil
 }

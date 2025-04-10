@@ -44,19 +44,19 @@ func (b *Bot) GetUpdatesChan() tgbotapi.UpdatesChannel {
 }
 
 func (b *Bot) SendText(chatId int64, text string) *tgbotapi.Message {
-	return b.sendWithOptions(chatId, text, res.NoPicture, nil, 0)
+	return b.sendWithOptions(chatId, text, res.NoPicture, nil, 0, false)
 }
 
 func (b *Bot) SendPic(chatId int64, text string, imageKey res.ImageKey) *tgbotapi.Message {
-	return b.sendWithOptions(chatId, text, imageKey, nil, 0)
+	return b.sendWithOptions(chatId, text, imageKey, nil, 0, false)
 }
 
 func (b *Bot) SendPicForceReply(chatId int64, text string, imageKey res.ImageKey, replyToMessageId int) *tgbotapi.Message {
-	return b.sendWithOptions(chatId, text, imageKey, nil, replyToMessageId)
+	return b.sendWithOptions(chatId, text, imageKey, nil, replyToMessageId, true)
 }
 
-func (b *Bot) SendPicWithKeyboard(chatId int64, text string, imageKey res.ImageKey, keyboard *tgbotapi.InlineKeyboardMarkup) *tgbotapi.Message {
-	return b.sendWithOptions(chatId, text, imageKey, keyboard, 0)
+func (b *Bot) SendPicWithKeyboard(chatId int64, text string, imageKey res.ImageKey, keyboard *tgbotapi.InlineKeyboardMarkup, replyToMessageId int) *tgbotapi.Message {
+	return b.sendWithOptions(chatId, text, imageKey, keyboard, replyToMessageId, false)
 }
 
 func (b *Bot) PinMessage(chatId int64, messageId int) {
@@ -74,18 +74,18 @@ func (b *Bot) PinMessage(chatId int64, messageId int) {
 
 //----------------------------------------------------------------------------------------
 
-func (b *Bot) sendWithOptions(chatId int64, text string, imageKey res.ImageKey, keyboard *tgbotapi.InlineKeyboardMarkup, replyToMessageId int) *tgbotapi.Message {
-	if keyboard != nil && replyToMessageId != 0 {
-		panic("Одновременное задание keyboard и replyToMessageId запрещено!")
+func (b *Bot) sendWithOptions(chatId int64, text string, imageKey res.ImageKey, keyboard *tgbotapi.InlineKeyboardMarkup, replyToMessageId int, isForceReplyNeeded bool) *tgbotapi.Message {
+	if keyboard != nil && isForceReplyNeeded {
+		panic("Одновременное задание keyboard и isForceReplyNeeded запрещено!")
 	}
 	if file, ok := res.GetImage(imageKey); ok {
-		return b.sendPicInternal(chatId, text, file, keyboard, replyToMessageId)
+		return b.sendPicInternal(chatId, text, file, keyboard, replyToMessageId, isForceReplyNeeded)
 	} else {
-		return b.sendTextInternal(chatId, text, keyboard, replyToMessageId)
+		return b.sendTextInternal(chatId, text, keyboard, replyToMessageId, isForceReplyNeeded)
 	}
 }
 
-func (b *Bot) sendPicInternal(chatId int64, text string, file []byte, keyboard *tgbotapi.InlineKeyboardMarkup, replyToMessageId int) *tgbotapi.Message {
+func (b *Bot) sendPicInternal(chatId int64, text string, file []byte, keyboard *tgbotapi.InlineKeyboardMarkup, replyToMessageId int, isForceReplyNeeded bool) *tgbotapi.Message {
 	photo := tgbotapi.FileBytes{
 		Name:  "pic",
 		Bytes: file,
@@ -97,22 +97,26 @@ func (b *Bot) sendPicInternal(chatId int64, text string, file []byte, keyboard *
 	if keyboard != nil {
 		message.ReplyMarkup = keyboard
 	}
-	if replyToMessageId != 0 {
+	if isForceReplyNeeded {
 		message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true}
+	}
+	if replyToMessageId != 0 {
 		message.ReplyToMessageID = replyToMessageId
 	}
 
 	return b.sendInternal(message)
 }
 
-func (b *Bot) sendTextInternal(chatId int64, text string, keyboard *tgbotapi.InlineKeyboardMarkup, replyToMessageId int) *tgbotapi.Message {
+func (b *Bot) sendTextInternal(chatId int64, text string, keyboard *tgbotapi.InlineKeyboardMarkup, replyToMessageId int, isForceReplyNeeded bool) *tgbotapi.Message {
 	//todo много дабликатов с отправкой картинки
 	message := prepareMessage(chatId, text)
 	if keyboard != nil {
 		message.ReplyMarkup = keyboard
 	}
-	if replyToMessageId != 0 {
+	if isForceReplyNeeded {
 		message.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true}
+	}
+	if replyToMessageId != 0 {
 		message.ReplyToMessageID = replyToMessageId
 	}
 

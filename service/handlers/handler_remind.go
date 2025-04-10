@@ -71,6 +71,6 @@ func (h RemindHandler) HandleReply(*mybot.Bot, tgbotapi.Update) error {
 	return nil
 }
 
-func (h RemindHandler) HandleCallback(*mybot.Bot, tgbotapi.Update) error {
+func (h RemindHandler) HandleCallback(*mybot.Bot, tgbotapi.Update, CallbackElement) error {
 	return nil
 }

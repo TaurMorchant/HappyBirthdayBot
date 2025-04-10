@@ -36,6 +36,6 @@ func (h ListHandler) HandleReply(*mybot.Bot, tgbotapi.Update) error {
 	return nil
 }
 
-func (h ListHandler) HandleCallback(*mybot.Bot, tgbotapi.Update) error {
+func (h ListHandler) HandleCallback(*mybot.Bot, tgbotapi.Update, CallbackElement) error {
 	return nil
 }

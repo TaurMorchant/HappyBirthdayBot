@@ -35,8 +35,8 @@ func (h WishlistHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 					tgbotapi.NewInlineKeyboardButtonData("Не, все норм", cancelButton),
 				),
 			)
-			sentMessage := bot.SendPicWithKeyboard(chatID, msg, res.Wishlist, &inlineKeyboard)
-			WaitingForCallbackHandlers.Add(sentMessage.MessageID, CallbackElement{UserId: userID, Handler: h})
+			sentMessage := bot.SendPicWithKeyboard(chatID, msg, res.Wishlist, &inlineKeyboard, messageID)
+			WaitingForCallbackHandlers.Add(sentMessage.MessageID, CallbackElement{UserId: userID, Handler: h, OriginalMessageId: messageID})
 		}
 	} else {
 		bot.SendPic(chatID, "Кажется ты еще не зарегистрирован в программе! Зарегистрируйся при помощи команды [/join](/join)!", res.Suspicious)
@@ -61,7 +61,7 @@ func (h WishlistHandler) HandleReply(bot *mybot.Bot, update tgbotapi.Update) err
 	return nil
 }
 
-func (h WishlistHandler) HandleCallback(bot *mybot.Bot, update tgbotapi.Update) error {
+func (h WishlistHandler) HandleCallback(bot *mybot.Bot, update tgbotapi.Update, callback CallbackElement) error {
 	log.Println("Handle callback for WishlistHandler")
 	chatID := update.CallbackQuery.Message.Chat.ID
 	userID := update.CallbackQuery.From.ID
@@ -69,7 +69,13 @@ func (h WishlistHandler) HandleCallback(bot *mybot.Bot, update tgbotapi.Update) 
 
 	if update.CallbackQuery.Data == okButton {
 		msg := "Напиши в ответ на это сообщение, что бы ты хотел получить в подарок?"
-		bot.SendPicForceReply(chatID, msg, res.Wishlist, messageID)
+		var messageToReplyId int
+		if callback.OriginalMessageId != 0 {
+			messageToReplyId = callback.OriginalMessageId
+		} else {
+			messageToReplyId = messageID
+		}
+		bot.SendPicForceReply(chatID, msg, res.Wishlist, messageToReplyId)
 		WaitingForReplyHandlers.Add(userID, h)
 	} else if update.CallbackQuery.Data == cancelButton {
 		bot.SendPic(chatID, "Океюшки", res.Ok)

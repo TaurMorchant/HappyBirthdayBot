@@ -107,7 +107,7 @@ func isExpired(update tgbotapi.Update) bool {
 	} else {
 		messageTime = int64(update.Message.Date)
 	}
-	return (currentTime - messageTime) > 10
+	return (currentTime - messageTime) > 60
 }
 
 func notRestricted(bot *mybot.Bot, update tgbotapi.Update) bool {
@@ -188,7 +188,7 @@ func handleCallback(bot *mybot.Bot, update tgbotapi.Update) {
 			bot.SendPic(chatId, "Это не для тебя кнопки, не трогай!", res.Angry)
 			return
 		} else {
-			err := callbackElement.Handler.HandleCallback(bot, update)
+			err := callbackElement.Handler.HandleCallback(bot, update, callbackElement)
 			if err != nil {
 				log.Panic("Error in callback:", err)
 				return

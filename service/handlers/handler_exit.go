@@ -18,6 +18,7 @@ const cancelButton = "cancel"
 func (h ExitHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
+	messageId := update.Message.MessageID
 
 	users := sheets.Read()
 
@@ -31,7 +32,7 @@ func (h ExitHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 			),
 		)
 
-		sentMessage := bot.SendPicWithKeyboard(chatID, msg, res.Sad, &inlineKeyboard)
+		sentMessage := bot.SendPicWithKeyboard(chatID, msg, res.Sad, &inlineKeyboard, messageId)
 
 		WaitingForCallbackHandlers.Add(sentMessage.MessageID, CallbackElement{UserId: userID, Handler: h})
 	} else {
@@ -44,7 +45,7 @@ func (h ExitHandler) HandleReply(*mybot.Bot, tgbotapi.Update) error {
 	return nil
 }
 
-func (h ExitHandler) HandleCallback(bot *mybot.Bot, update tgbotapi.Update) error {
+func (h ExitHandler) HandleCallback(bot *mybot.Bot, update tgbotapi.Update, _ CallbackElement) error {
 	log.Println("Handle callback for ExitHandler")
 	chatID := update.CallbackQuery.Message.Chat.ID
 	userID := update.CallbackQuery.From.ID

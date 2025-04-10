@@ -17,10 +17,7 @@ func New[K any, V interface{}](defaultExpiration, cleanupInterval time.Duration)
 }
 
 func (c *Cache[K, V]) Add(key K, value V) {
-	err := c.Cache.Add(fmt.Sprintf("%v", key), value, gocache.DefaultExpiration)
-	if err != nil {
-		log.Panicln("Cannot add element to cache: ", err)
-	}
+	c.Cache.Set(fmt.Sprintf("%v", key), value, gocache.DefaultExpiration)
 }
 
 func (c *Cache[K, V]) Get(key K) (V, bool) {

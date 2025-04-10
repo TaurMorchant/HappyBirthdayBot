@@ -72,7 +72,7 @@ func (h JoinHandler) HandleReply(bot *mybot.Bot, update tgbotapi.Update) error {
 	return nil
 }
 
-func (h JoinHandler) HandleCallback(*mybot.Bot, tgbotapi.Update) error {
+func (h JoinHandler) HandleCallback(*mybot.Bot, tgbotapi.Update, CallbackElement) error {
 	return nil
 }
 

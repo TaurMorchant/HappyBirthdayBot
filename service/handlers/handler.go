@@ -8,5 +8,5 @@ import (
 type IHandler interface {
 	Handle(bot *mybot.Bot, update tgbotapi.Update) error
 	HandleReply(bot *mybot.Bot, update tgbotapi.Update) error
-	HandleCallback(bot *mybot.Bot, update tgbotapi.Update) error
+	HandleCallback(bot *mybot.Bot, update tgbotapi.Update, callback CallbackElement) error
 }

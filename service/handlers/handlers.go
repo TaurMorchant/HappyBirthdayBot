@@ -16,8 +16,9 @@ var Handlers = map[string]IHandler{
 }
 
 type CallbackElement struct {
-	UserId  int64
-	Handler IHandler
+	UserId            int64
+	Handler           IHandler
+	OriginalMessageId int
 }
 
 var WaitingForCallbackHandlers = cache.New[int, CallbackElement](5*time.Minute, 10*time.Minute)
