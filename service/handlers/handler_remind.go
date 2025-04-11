@@ -16,25 +16,34 @@ type RemindHandler struct {
 const numberOfNames = 3
 
 func (h RemindHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
+	chatID := update.Message.Chat.ID
+
 	users := sheets.Read()
 
-	nextBirthdayUsers, err := users.GetNextBirthdayUsers(numberOfNames)
-	if err != nil {
-		return err
+	if len(users.AllUsers()) == 0 {
+		msg := "Пока ещё никто не загеристрировался 😢"
+
+		bot.SendPic(chatID, msg, res.Sad)
+	} else {
+
+		nextBirthdayUsers, err := users.GetNextBirthdayUsers(numberOfNames)
+		if err != nil {
+			return err
+		}
+
+		maxNameLength := nextBirthdayUsers.GetMaxNameLength()
+		maxMonthLength := nextBirthdayUsers.GetMaxMonthLength()
+
+		log.Println("maxNameLength = ", maxNameLength)
+		log.Println("maxMonthLength = ", maxMonthLength)
+
+		msg := "Ближайшие именинники:\n```\n"
+		for _, user := range nextBirthdayUsers.AllUsers() {
+			msg += formatterStr(user, maxNameLength, maxMonthLength) + "\n"
+		}
+		msg += "```"
+		bot.SendPic(chatID, msg, res.Many)
 	}
-
-	maxNameLength := nextBirthdayUsers.GetMaxNameLength()
-	maxMonthLength := nextBirthdayUsers.GetMaxMonthLength()
-
-	log.Println("maxNameLength = ", maxNameLength)
-	log.Println("maxMonthLength = ", maxMonthLength)
-
-	msg := "Ближайшие именинники:\n```\n"
-	for _, user := range nextBirthdayUsers.AllUsers() {
-		msg += formatterStr(user, maxNameLength, maxMonthLength) + "\n"
-	}
-	msg += "```"
-	bot.SendPic(update.Message.Chat.ID, msg, res.Many)
 
 	return nil
 }

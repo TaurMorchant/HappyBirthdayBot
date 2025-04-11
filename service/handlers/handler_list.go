@@ -15,19 +15,25 @@ func (h ListHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	log.Printf("Handle list command")
 	chatID := update.Message.Chat.ID
 
-	msg := "📅 Вот список всех участников:\n```\n"
-
 	users := sheets.Read()
 	usersSlice := users.AllUsers()
 
-	maxNameLength := users.GetMaxNameLength()
-	maxMonthLength := users.GetMaxMonthLength()
+	if len(usersSlice) == 0 {
+		msg := "Пока ещё никто не загеристрировался 😢"
 
-	for _, user := range usersSlice {
-		msg += user.FormattedString(maxNameLength, maxMonthLength) + "\n"
+		bot.SendPic(chatID, msg, res.Sad)
+	} else {
+		msg := "📅 Вот список всех участников:\n```\n"
+
+		maxNameLength := users.GetMaxNameLength()
+		maxMonthLength := users.GetMaxMonthLength()
+
+		for _, user := range usersSlice {
+			msg += user.FormattedString(maxNameLength, maxMonthLength) + "\n"
+		}
+		msg += "\n```"
+		bot.SendPic(chatID, msg, res.Many)
 	}
-	msg += "\n```"
-	bot.SendPic(chatID, msg, res.Many)
 
 	return nil
 }
