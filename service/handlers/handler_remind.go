@@ -21,7 +21,7 @@ func (h RemindHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	users := sheets.Read()
 
 	if len(users.AllUsers()) == 0 {
-		msg := "Пока ещё никто не загеристрировался 😢"
+		msg := "Пока ещё никто не зарегистрировался 😢"
 
 		bot.SendPic(chatID, msg, res.Sad)
 	} else {

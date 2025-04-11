@@ -19,7 +19,7 @@ func (h ListHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	usersSlice := users.AllUsers()
 
 	if len(usersSlice) == 0 {
-		msg := "Пока ещё никто не загеристрировался 😢"
+		msg := "Пока ещё никто не зарегистрировался 😢"
 
 		bot.SendPic(chatID, msg, res.Sad)
 	} else {

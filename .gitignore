@@ -1,0 +1,11 @@
+# JetBrains IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# .exe
+*.exe
+
+# .log
+*.log
