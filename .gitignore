@@ -9,3 +9,10 @@
 
 # .log
 *.log
+
+# Secrets
+.env
+configs-prod/
+
+# Logs
+service/logs/

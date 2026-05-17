@@ -7,3 +7,4 @@ services:
       - TZ=Europe/Samara
     volumes:
       - ./configs:/config:ro
+      - ./logs:/app/logs

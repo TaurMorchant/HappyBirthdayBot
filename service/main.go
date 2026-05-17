@@ -51,7 +51,11 @@ func getConfigsPath() string {
 }
 
 func configureLogger() *os.File {
-	fileName := fmt.Sprintf("happy_birthday_bot_%s.log", time.Now().Format("2006-01-02_15.04.05"))
+	logDir := "logs"
+	if err := os.MkdirAll(logDir, 0755); err != nil {
+		log.Panic(err)
+	}
+	fileName := fmt.Sprintf("%s/happy_birthday_bot_%s.log", logDir, time.Now().Format("2006-01-02_15.04.05"))
 	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Panic(err)
