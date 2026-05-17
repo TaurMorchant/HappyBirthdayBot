@@ -30,7 +30,7 @@ func main() {
 	configsDir := getConfigsPath()
 
 	config.InitConfigs(configsDir)
-	db.Init(configsDir + "/data.db")
+	db.Init("data/data.db")
 	sheets.InitSpreadsheetService()
 
 	bot := mybot.Register()

@@ -4,12 +4,18 @@ import (
 	"database/sql"
 	"log"
 	_ "modernc.org/sqlite"
+	"os"
+	"path/filepath"
 	"time"
 )
 
 var instance *sql.DB
 
 func Init(path string) {
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		log.Panic("Failed to create db directory:", err)
+	}
+
 	var err error
 	instance, err = sql.Open("sqlite", path)
 	if err != nil {
