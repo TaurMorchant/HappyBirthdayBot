@@ -5,6 +5,7 @@ import (
 	"happy-birthday-bot/resources"
 	"log"
 	"os"
+	"strings"
 )
 
 type Bot struct {
@@ -104,6 +105,7 @@ func (b *Bot) sendPicInternal(chatId int64, text string, file []byte, keyboard *
 		message.ReplyToMessageID = replyToMessageId
 	}
 
+	log.Printf("[DEBUG] send message with pic internal: %s", text)
 	return b.sendInternal(message)
 }
 
@@ -120,6 +122,7 @@ func (b *Bot) sendTextInternal(chatId int64, text string, keyboard *tgbotapi.Inl
 		message.ReplyToMessageID = replyToMessageId
 	}
 
+	log.Printf("[DEBUG] send message internal: %s", text)
 	return b.sendInternal(message)
 }
 
@@ -137,4 +140,19 @@ func (b *Bot) sendInternal(message tgbotapi.Chattable) *tgbotapi.Message {
 	}
 	log.Printf("Message [%s] sent in chat %d", mess.Text, mess.Chat.ID)
 	return &mess
+}
+
+func escapeMarkdownV2(text string) string {
+	var b strings.Builder
+	b.Grow(len(text))
+
+	specials := "_*[]()~`>#+-=|{}.!"
+	for _, r := range text {
+		if strings.ContainsRune(specials, r) {
+			b.WriteRune('\\')
+		}
+		b.WriteRune(r)
+	}
+
+	return b.String()
 }
