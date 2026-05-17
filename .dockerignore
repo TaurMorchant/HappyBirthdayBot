@@ -1,0 +1,7 @@
+.git
+.idea
+configs-prod
+configs-test
+*.exe
+*.log
+*.bat
