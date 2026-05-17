@@ -85,9 +85,12 @@ docker compose down
 │   │   ├── application.properties
 │   │   ├── allowedUsers.properties
 │   │   ├── allowedChats.properties
-│   │   ├── birthdayChats.csv
-│   │   └── happybirthdaybot-454814-2dec5157295e.json
+│   │   └── birthdayChats.csv
 │   └── configs-test/
+├── data-prod/
+│   └── data.db                # SQLite база prod
+├── data-test/
+│   └── data.db                # SQLite база test
 ├── docker-compose.yml         # копируется из HappyBirthdayBot-configs
 ├── logs/                      # персистентные лог-файлы
 └── .env                       # TELEGRAM_BOT_TOKEN + ENVIRONMENT (не в git!)

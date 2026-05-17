@@ -33,7 +33,7 @@ The bot is a single-process Go application with two concurrent flows:
 
 - **`mybot/`** — bot wrapper (`Bot` struct embedding `tgbotapi.BotAPI`), command constants, cron reminder task
 - **`handlers/`** — one file per command, all implementing `IHandler` interface (3 methods: `Handle`, `HandleReply`, `HandleCallback`)
-- **`sheets/`** — Google Sheets read/write; this is the sole data store (no database)
+- **`db/`** — SQLite data layer (`modernc.org/sqlite`, pure Go); `Init`, `ReadUsers`, `InsertUser`, `DeleteUser`, `UpdateWishlist`, `UpdateFlags`
 - **`usr/`** — `User` and `Users` domain types; `daysBeforeBirthday` is computed at read-time
 - **`date/`** — `Birthday` type (day+month only, no year); Russian month name parsing/formatting
 - **`config/`** — loads all config files from the directory passed as CLI arg; also reads `birthdayChats.csv`
@@ -51,17 +51,19 @@ Both caches have a 5-minute TTL.
 
 ### Reminder logic (reminder_task.go)
 
-On each cron tick, reads all users from Sheets and applies these transitions (flags stored back in Sheets):
+On each cron tick, reads all users from SQLite and applies these transitions (flags written back per-user immediately after each action):
 - `DaysBeforeBirthday == 0` → send birthday congratulation, set `BirthdayGreetings=true`
 - `≤ 14 days` → send 14-day reminder (with birthday chat link if configured)
 - `≤ 30 days` → send 30-day reminder, pin message, send wishlist to birthday chat
 - `> 30 days && BirthdayGreetings == true` → reset all three flags for the next year
 
-### Data storage (Google Sheets)
+### Data storage (SQLite)
 
-Columns A–G per user row: `Id | Name | Birthday | Wishlist | Reminder30days | Reminder15days | BirthdayGreetings`
+File: `data/data.db` relative to working directory (mounted as a Docker volume in production).
 
-Birthday format in the sheet: `"25 марта"` (day + Russian month name).
+Table `users`: `id | name | birthday | wishlist | reminder30days | reminder15days | birthday_greetings`
+
+Birthday format: `"25 марта"` (day + Russian month name). DB opened with WAL mode and `busy_timeout=5000ms`.
 
 ## Configuration Files
 
@@ -69,11 +71,10 @@ Config directory is passed as the first CLI argument (e.g., `configs-test` or `c
 
 | File | Purpose |
 |---|---|
-| `application.properties` | `mainChatId`, `adminChatId`, `reminderTriggerCron` (cron with seconds), `spreadsheetList`, `spreadsheetID` |
+| `application.properties` | `mainChatId`, `adminChatId`, `reminderTriggerCron` (cron with seconds) |
 | `allowedUsers.properties` | `<telegramUserId>: <name>` — who can interact with the bot |
 | `allowedChats.properties` | `<chatId>: <name>` — additional allowed chats beyond birthday chats |
 | `birthdayChats.csv` | `UserId, Name, ChatLink, ChatId` — per-person birthday discussion chats |
-| `happybirthdaybot-454814-2dec5157295e.json` | Google service account credentials (JWT) for Sheets API |
 
 Two environments exist: `configs-test/` (committed) and `configs-prod/` (gitignored).
 
