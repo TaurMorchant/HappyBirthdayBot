@@ -8,7 +8,6 @@ import (
 	"happy-birthday-bot/handlers"
 	"happy-birthday-bot/mybot"
 	res "happy-birthday-bot/resources"
-	"happy-birthday-bot/sheets"
 	"io"
 	"log"
 	"os"
@@ -31,7 +30,6 @@ func main() {
 
 	config.InitConfigs(configsDir)
 	db.Init("data/data.db")
-	sheets.InitSpreadsheetService()
 
 	bot := mybot.Register()
 

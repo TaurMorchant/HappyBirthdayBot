@@ -3,9 +3,9 @@ package handlers
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"happy-birthday-bot/db"
 	"happy-birthday-bot/mybot"
 	"happy-birthday-bot/resources"
-	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
 	"log"
 )
@@ -18,7 +18,7 @@ func (h WishlistHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	userID := update.Message.From.ID
 	messageID := update.Message.MessageID
 
-	users := sheets.Read()
+	users := db.ReadUsers()
 
 	if user, ok := users.Get(usr.UserId(userID)); ok {
 		if len(user.Wishlist) == 0 {
@@ -49,15 +49,10 @@ func (h WishlistHandler) HandleReply(bot *mybot.Bot, update tgbotapi.Update) err
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
 
-	users := sheets.Read()
-	if user, ok := users.Get(usr.UserId(userID)); ok {
-		user.Wishlist = update.Message.Text
-		sheets.Write(&users)
-
-		bot.SendPic(chatID, "Вжух, вишлист обновлён! 👌", res.Vjuh)
-	} else {
-		log.Panicf("User with ID %d not found", usr.UserId(userID))
+	if err := db.UpdateWishlist(usr.UserId(userID), update.Message.Text); err != nil {
+		log.Panicf("Failed to update wishlist for user %d: %v", userID, err)
 	}
+	bot.SendPic(chatID, "Вжух, вишлист обновлён! 👌", res.Vjuh)
 	return nil
 }
 

@@ -4,9 +4,9 @@ import (
 	"errors"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"happy-birthday-bot/date"
+	"happy-birthday-bot/db"
 	"happy-birthday-bot/mybot"
 	res "happy-birthday-bot/resources"
-	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
 	"log"
 	"strings"
@@ -25,7 +25,7 @@ func (h JoinHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	userID := update.Message.From.ID
 	messageID := update.Message.MessageID
 
-	users := sheets.Read()
+	users := db.ReadUsers()
 	if user, ok := users.Get(usr.UserId(userID)); ok {
 		msg := "Ты уже зарегистрирован! 😎\n\n"
 		if len(user.Wishlist) == 0 {
@@ -50,7 +50,7 @@ func (h JoinHandler) HandleReply(bot *mybot.Bot, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
 
-	users := sheets.Read()
+	users := db.ReadUsers()
 	if _, ok := users.Get(usr.UserId(userID)); ok {
 		bot.SendPic(chatID, "Ты уже зарегистрирован! 😎", res.Cool)
 		return nil
@@ -64,8 +64,9 @@ func (h JoinHandler) HandleReply(bot *mybot.Bot, update tgbotapi.Update) error {
 	user := usr.User{Id: usr.UserId(userID), Name: name}
 	user.SetBirthday2(birthDay, time.Now())
 
-	users.Add(&user)
-	sheets.Write(&users)
+	if err := db.InsertUser(&user); err != nil {
+		log.Panicf("Failed to insert user %d: %v", userID, err)
+	}
 
 	bot.SendPic(chatID, "Поздравляю, теперь тебя отхеппибёздят! 🥳", res.Cool)
 

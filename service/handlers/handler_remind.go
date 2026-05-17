@@ -3,9 +3,9 @@ package handlers
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"happy-birthday-bot/db"
 	"happy-birthday-bot/mybot"
 	res "happy-birthday-bot/resources"
-	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
 	"log"
 )
@@ -18,7 +18,7 @@ const numberOfNames = 3
 func (h RemindHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
 
-	users := sheets.Read()
+	users := db.ReadUsers()
 
 	if len(users.AllUsers()) == 0 {
 		msg := "Пока ещё никто не зарегистрировался 😢"

@@ -4,10 +4,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"github.com/magiconair/properties"
-	"golang.org/x/oauth2/google"
-	"golang.org/x/oauth2/jwt"
-	"google.golang.org/api/sheets/v4"
-	"log"
 	"os"
 	"strconv"
 )
@@ -15,30 +11,15 @@ import (
 const MainChatIdProp = "mainChatId"
 const AdminChatIdProp = "adminChatId"
 const ReminderTriggerCronProp = "reminderTriggerCron"
-const SpreadsheetListProp = "spreadsheetList"
-const SpreadsheetIdProp = "spreadsheetID"
 
 var allowedUsers *properties.Properties
 var allowedChats *properties.Properties
 var applicationProperties *properties.Properties
-var spreadsheetConfig *jwt.Config
 
 func InitConfigs(configsDir string) {
 	allowedUsers = properties.MustLoadFile(configsDir+"/allowedUsers.properties", properties.UTF8)
 	allowedChats = properties.MustLoadFile(configsDir+"/allowedChats.properties", properties.UTF8)
 	applicationProperties = properties.MustLoadFile(configsDir+"/application.properties", properties.UTF8)
-
-	// Загружаем учетные данные из JSON-файла
-	data, err := os.ReadFile(configsDir + "/happybirthdaybot-454814-2dec5157295e.json")
-	if err != nil {
-		log.Panicf("Не удалось прочитать файл ключа: %v", err)
-	}
-
-	// Настраиваем клиента
-	spreadsheetConfig, err = google.JWTConfigFromJSON(data, sheets.SpreadsheetsScope)
-	if err != nil {
-		log.Panicf("Ошибка при настройке JWT: %v", err)
-	}
 
 	initBirthdayChats(configsDir)
 }
@@ -77,10 +58,6 @@ func GetInt64Property(key string) int64 {
 		panic(msg)
 	}
 	return result
-}
-
-func SpreadsheetConfig() *jwt.Config {
-	return spreadsheetConfig
 }
 
 //----------------------------------------------------------------------------------------------

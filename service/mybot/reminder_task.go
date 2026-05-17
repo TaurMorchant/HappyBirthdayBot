@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/robfig/cron/v3"
 	"happy-birthday-bot/config"
+	"happy-birthday-bot/db"
 	res "happy-birthday-bot/resources"
-	"happy-birthday-bot/sheets"
 	"happy-birthday-bot/usr"
 	"log"
 	"runtime/debug"
@@ -34,36 +34,24 @@ func StartReminderTask(bot *Bot) {
 func isBirthdayComingUp(bot *Bot) {
 	defer handlePanic(bot)
 	log.Println("Check is birthday coming up")
-	users := sheets.Read()
-	isUpdateNeeded := false
+	users := db.ReadUsers()
 	for _, user := range users.AllUsers() {
 		if user.DaysBeforeBirthday() == 0 && !user.BirthdayGreetings {
 			handleBirthday(bot, user)
-			isUpdateNeeded = true
-			continue
-		}
-		if user.DaysBeforeBirthday() <= 14 && !user.Reminder15days {
+		} else if user.DaysBeforeBirthday() <= 14 && !user.Reminder15days {
 			handle15Days(bot, user)
-			isUpdateNeeded = true
-			continue
-		}
-		if user.DaysBeforeBirthday() <= 30 && !user.Reminder30days {
+		} else if user.DaysBeforeBirthday() <= 30 && !user.Reminder30days {
 			handle30Days(bot, user)
-			isUpdateNeeded = true
-			continue
-		}
-		if user.DaysBeforeBirthday() > 30 && user.BirthdayGreetings {
-			//reset
+		} else if user.DaysBeforeBirthday() > 30 && user.BirthdayGreetings {
 			user.BirthdayGreetings = false
 			user.Reminder15days = false
 			user.Reminder30days = false
-			isUpdateNeeded = true
+		} else {
+			continue
 		}
-
-	}
-	log.Println("isUpdateNeeded = ", isUpdateNeeded)
-	if isUpdateNeeded {
-		sheets.Write(&users)
+		if err := db.UpdateFlags(user); err != nil {
+			log.Panicf("Failed to persist flags for user %d: %v", user.Id, err)
+		}
 	}
 }
 

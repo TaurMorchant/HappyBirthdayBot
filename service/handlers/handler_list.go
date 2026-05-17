@@ -2,9 +2,9 @@ package handlers
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"happy-birthday-bot/db"
 	"happy-birthday-bot/mybot"
 	res "happy-birthday-bot/resources"
-	"happy-birthday-bot/sheets"
 	"log"
 )
 
@@ -15,7 +15,7 @@ func (h ListHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	log.Printf("Handle list command")
 	chatID := update.Message.Chat.ID
 
-	users := sheets.Read()
+	users := db.ReadUsers()
 	usersSlice := users.AllUsers()
 
 	if len(usersSlice) == 0 {
