@@ -48,6 +48,9 @@ cd /opt/happy-birthday-bot
 echo "TELEGRAM_BOT_TOKEN=ВАШ_ТОКЕН" > .env
 chmod 600 .env
 
+# Создать директорию для логов
+mkdir -p logs
+
 # Запустить
 docker compose pull
 docker compose up -d
@@ -57,9 +60,24 @@ docker compose up -d
 
 ## Обновление бота
 
+### Только код (docker-compose.yml не менялся)
+
 ```bash
 cd /opt/happy-birthday-bot
 docker compose pull && docker compose up -d
+```
+
+### Если изменился docker-compose.yml
+
+Скопировать обновлённый файл с локальной машины (Windows):
+```powershell
+scp C:\go_modules\happy_birthday_bot\docker-compose.yml root@VPS_IP:/opt/happy-birthday-bot/
+```
+
+Затем на сервере пересоздать контейнер:
+```bash
+cd /opt/happy-birthday-bot
+docker compose up -d --force-recreate
 ```
 
 ---

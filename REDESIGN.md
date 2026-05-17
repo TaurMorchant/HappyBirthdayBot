@@ -76,7 +76,10 @@ Cron-задача без изменений:
 Конфиг-директория и SQLite-файл монтируются как volume с хоста.
 
 ### CI/CD
-GitHub Actions: при пуше в `main` — сборка образа и пуш в GitHub Container Registry (ghcr.io). На VPS: `docker compose pull && docker compose up -d`.
+GitHub Actions: при пуше в `main` — сборка образа, пуш в GitHub Container Registry (ghcr.io), затем автоматический деплой на VPS по SSH (`docker compose pull && docker compose up -d`).
+
+Секреты в репозитории: `TELEGRAM_BOT_TOKEN`, `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`.  
+Для деплоя генерируется отдельная SSH-пара ключей (не личный ключ разработчика).
 
 ### Автоперезапуск
 `restart: unless-stopped` в compose-файле — бот поднимается автоматически после перезагрузки сервера.
