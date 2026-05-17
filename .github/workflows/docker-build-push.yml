@@ -1,11 +1,11 @@
-name: Build and Push
+name: Build, Push and Deploy
 
 on:
   push:
     branches: [main]
 
 jobs:
-  build-and-push:
+  build-push-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -30,7 +30,32 @@ jobs:
           push: true
           tags: ${{ env.IMAGE }}:latest
 
-      - name: Copy docker-compose.yml to VPS
+      - name: Ensure VPS is ready
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            if ! command -v docker &> /dev/null; then
+              curl -fsSL https://get.docker.com | sh
+            fi
+            if ! docker compose version &> /dev/null; then
+              mkdir -p /usr/local/lib/docker/cli-plugins
+              curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" \
+                -o /usr/local/lib/docker/cli-plugins/docker-compose
+              chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+            fi
+            mkdir -p /opt/happy-birthday-bot/configs
+            mkdir -p /opt/happy-birthday-bot/logs
+            if [ ! -f /opt/happy-birthday-bot/.env ]; then
+              echo "TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN" > /opt/happy-birthday-bot/.env
+              chmod 600 /opt/happy-birthday-bot/.env
+            fi
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+
+      - name: Copy docker-compose.yml
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DEPLOY_HOST }}
@@ -39,7 +64,7 @@ jobs:
           source: docker-compose.yml
           target: /opt/happy-birthday-bot
 
-      - name: Deploy to VPS
+      - name: Deploy
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.DEPLOY_HOST }}

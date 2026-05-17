@@ -13,48 +13,21 @@ ghcr.io/taurmorchant/happybirthdaybot:latest
 
 ## Первоначальная настройка VPS (один раз)
 
-### Шаг 1 — На сервере: установить Docker и создать директорию
+### Шаг 1 — Скопировать конфиги вручную (единственный ручной шаг)
 
-```bash
-# Установить Docker (если не стоит)
-curl -fsSL https://get.docker.com | sh
-
-# Установить Docker Compose plugin (если Ubuntu — из apt может не поставиться, ставим вручную)
-mkdir -p /usr/local/lib/docker/cli-plugins
-curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" \
-  -o /usr/local/lib/docker/cli-plugins/docker-compose
-chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-
-# Создать рабочую директорию
-mkdir -p /opt/happy-birthday-bot/configs
-```
-
-### Шаг 2 — На локальной машине (Windows): скопировать файлы на сервер
+Конфиги содержат чувствительные данные и не хранятся в репозитории — копируются один раз с локальной машины:
 
 ```powershell
-# Конфиги
 scp C:\go_modules\happy_birthday_bot\configs-prod\* root@VPS_IP:/opt/happy-birthday-bot/configs/
-
-# docker-compose.yml
-scp C:\go_modules\happy_birthday_bot\docker-compose.yml root@VPS_IP:/opt/happy-birthday-bot/
 ```
 
-### Шаг 3 — На сервере: создать .env и запустить
+### Шаг 2 — Запустить pipeline
 
-```bash
-cd /opt/happy-birthday-bot
-
-# Создать файл с токеном бота
-echo "TELEGRAM_BOT_TOKEN=ВАШ_ТОКЕН" > .env
-chmod 600 .env
-
-# Создать директорию для логов
-mkdir -p logs
-
-# Запустить
-docker compose pull
-docker compose up -d
-```
+Сделать любой пуш в `main`. Pipeline автоматически:
+- Установит Docker и Docker Compose plugin (если не стоят)
+- Создаст директории и `.env` с токеном
+- Скопирует `docker-compose.yml`
+- Запустит бота
 
 ---
 
