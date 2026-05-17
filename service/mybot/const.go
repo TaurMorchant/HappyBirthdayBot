@@ -9,6 +9,7 @@ const (
 	Join      = "join"
 	Wishlist  = "wishlist"
 	Exit      = "exit"
+	DbTest    = "dbtest"
 )
 
 var Commands = []tgbotapi.BotCommand{

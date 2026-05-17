@@ -13,6 +13,7 @@ var Handlers = map[string]IHandler{
 	mybot.List:      &ListHandler{},
 	mybot.Reminders: &RemindHandler{},
 	mybot.Wishlist:  &WishlistHandler{},
+	mybot.DbTest:    &DbTestHandler{},
 }
 
 type CallbackElement struct {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"happy-birthday-bot/config"
+	"happy-birthday-bot/db"
 	"happy-birthday-bot/handlers"
 	"happy-birthday-bot/mybot"
 	res "happy-birthday-bot/resources"
@@ -29,6 +30,7 @@ func main() {
 	configsDir := getConfigsPath()
 
 	config.InitConfigs(configsDir)
+	db.Init(configsDir + "/data.db")
 	sheets.InitSpreadsheetService()
 
 	bot := mybot.Register()
