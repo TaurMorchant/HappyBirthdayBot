@@ -115,6 +115,18 @@ func ReactivateUser(userId usr.UserId, name string, birthday date.Birthday) (boo
 	return rows > 0, err
 }
 
+func UpdateUserData(userId usr.UserId, name string, birthday date.Birthday) (bool, error) {
+	result, err := instance.Exec(
+		`UPDATE users SET name = ?, birthday = ? WHERE id = ? AND disabled = 0`,
+		name, birthday.ToString(), int64(userId),
+	)
+	if err != nil {
+		return false, err
+	}
+	rows, err := result.RowsAffected()
+	return rows > 0, err
+}
+
 func UpdateWishlist(userId usr.UserId, wishlist string) error {
 	_, err := instance.Exec(`UPDATE users SET wishlist = ? WHERE id = ?`, wishlist, int64(userId))
 	return err

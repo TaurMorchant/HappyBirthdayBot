@@ -19,30 +19,32 @@ func (h WishlistHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	messageID := update.Message.MessageID
 
 	users := db.ReadUsers()
-
 	if user, ok := users.Get(usr.UserId(userID)); ok {
-		if len(user.Wishlist) == 0 {
-			msg := "Похоже ты еще не составил свой вишлист! Самое время это сделать! Напиши в ответ на это сообщение, что бы ты хотел получить в подарок?"
-			bot.SendPicForceReply(chatID, msg, res.Wishlist, messageID)
-			WaitingForReplyHandlers.Add(userID, h)
-		} else {
-			msg := fmt.Sprintf("У тебя сейчас такой вишлист:\n\n```\n%s\n```\n"+
-				"Хочешь его поменять?", user.Wishlist)
-
-			inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
-				tgbotapi.NewInlineKeyboardRow(
-					tgbotapi.NewInlineKeyboardButtonData("Хочу", okButton),
-					tgbotapi.NewInlineKeyboardButtonData("Не, все норм", cancelButton),
-				),
-			)
-			sentMessage := bot.SendPicWithKeyboard(chatID, msg, res.Wishlist, &inlineKeyboard, messageID)
-			WaitingForCallbackHandlers.Add(sentMessage.MessageID, CallbackElement{UserId: userID, Handler: h, OriginalMessageId: messageID})
-		}
+		startWishlistFlow(bot, chatID, userID, messageID, user)
 	} else {
 		bot.SendPic(chatID, "Кажется ты еще не зарегистрирован в программе! Зарегистрируйся при помощи команды [/join](/join)!", res.Suspicious)
 	}
 
 	return nil
+}
+
+func startWishlistFlow(bot *mybot.Bot, chatID int64, userID int64, messageID int, user *usr.User) {
+	if len(user.Wishlist) == 0 {
+		msg := "Похоже ты еще не составил свой вишлист! Самое время это сделать! Напиши в ответ на это сообщение, что бы ты хотел получить в подарок?"
+		bot.SendPicForceReply(chatID, msg, res.Wishlist, messageID)
+		WaitingForReplyHandlers.Add(userID, WishlistHandler{})
+	} else {
+		msg := fmt.Sprintf("У тебя сейчас такой вишлист:\n\n```\n%s\n```\n"+
+			"Хочешь его поменять?", user.Wishlist)
+		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("Хочу", okButton),
+				tgbotapi.NewInlineKeyboardButtonData("Не, все норм", cancelButton),
+			),
+		)
+		sentMessage := bot.SendPicWithKeyboard(chatID, msg, res.Wishlist, &inlineKeyboard, messageID)
+		WaitingForCallbackHandlers.Add(sentMessage.MessageID, CallbackElement{UserId: userID, Handler: WishlistHandler{}, OriginalMessageId: messageID})
+	}
 }
 
 func (h WishlistHandler) HandleReply(bot *mybot.Bot, update tgbotapi.Update) error {

@@ -16,6 +16,10 @@ import (
 
 const Layout = "02.01.2006"
 
+const joinChangeDataButton = "join_change_data"
+const joinChangeWishlistButton = "join_change_wishlist"
+const joinAllOkButton = "join_all_ok"
+
 type JoinHandler struct {
 }
 
@@ -26,22 +30,22 @@ func (h JoinHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	messageID := update.Message.MessageID
 
 	users := db.ReadUsers()
-	if user, ok := users.Get(usr.UserId(userID)); ok {
-		msg := "Ты уже зарегистрирован! 😎\n\n"
-		if len(user.Wishlist) == 0 {
-			msg += "Хочешь задать свой вишлист? [/wishlist](/wishlist)"
-		} else {
-			msg += "Хочешь поменять свой вишлист? [/wishlist](/wishlist)"
-		}
-
-		bot.SendPic(chatID, msg, res.Cool)
+	if _, ok := users.Get(usr.UserId(userID)); ok {
+		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("Поменять данные", joinChangeDataButton),
+				tgbotapi.NewInlineKeyboardButtonData("Задать вишлист", joinChangeWishlistButton),
+				tgbotapi.NewInlineKeyboardButtonData("Все ок", joinAllOkButton),
+			),
+		)
+		sentMessage := bot.SendPicWithKeyboard(chatID, "Ты уже зарегистрирован! 😎", res.Cool, &inlineKeyboard, messageID)
+		WaitingForCallbackHandlers.Add(sentMessage.MessageID, CallbackElement{UserId: userID, Handler: h, OriginalMessageId: messageID})
 		return nil
 	}
 
 	msg := "Отлично! Ответь на это сообщение вот так:\n\n`<Твое имя>, <Твоя дата рождения>`\n\n" +
 		"Например:\n\n`Вася Пупкин, 25.03`\n\nили\n\n`Вася Пупкин, 25 марта`"
 	bot.SendPicForceReply(chatID, msg, res.Waiting, messageID)
-
 	WaitingForReplyHandlers.Add(userID, h)
 	return nil
 }
@@ -49,12 +53,6 @@ func (h JoinHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 func (h JoinHandler) HandleReply(bot *mybot.Bot, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
-
-	users := db.ReadUsers()
-	if _, ok := users.Get(usr.UserId(userID)); ok {
-		bot.SendPic(chatID, "Ты уже зарегистрирован! 😎", res.Cool)
-		return nil
-	}
 
 	name, birthDay, err := parseNameAndBirthday(update.Message.Text)
 	if err != nil {
@@ -70,19 +68,46 @@ func (h JoinHandler) HandleReply(bot *mybot.Bot, update tgbotapi.Update) error {
 		return nil
 	}
 
+	updated, err := db.UpdateUserData(usr.UserId(userID), name, birthDay)
+	if err != nil {
+		log.Panicf("Failed to update user %d: %v", userID, err)
+	}
+	if updated {
+		bot.SendPic(chatID, "Данные обновлены! 👌", res.Cool)
+		return nil
+	}
+
 	user := usr.User{Id: usr.UserId(userID), Name: name}
 	user.SetBirthday2(birthDay, time.Now())
-
 	if err := db.InsertUser(&user); err != nil {
 		log.Panicf("Failed to insert user %d: %v", userID, err)
 	}
-
 	bot.SendPic(chatID, "Поздравляю, теперь тебя отхеппибёздят! 🥳", res.Cool)
-
 	return nil
 }
 
-func (h JoinHandler) HandleCallback(*mybot.Bot, tgbotapi.Update, CallbackElement) error {
+func (h JoinHandler) HandleCallback(bot *mybot.Bot, update tgbotapi.Update, callback CallbackElement) error {
+	log.Println("Handle callback for JoinHandler")
+	chatID := update.CallbackQuery.Message.Chat.ID
+	userID := update.CallbackQuery.From.ID
+	messageID := update.CallbackQuery.Message.MessageID
+
+	switch update.CallbackQuery.Data {
+	case joinChangeDataButton:
+		msg := "Отлично! Ответь на это сообщение вот так:\n\n`<Твое имя>, <Твоя дата рождения>`\n\n" +
+			"Например:\n\n`Вася Пупкин, 25.03`\n\nили\n\n`Вася Пупкин, 25 марта`"
+		bot.SendPicForceReply(chatID, msg, res.Waiting, messageID)
+		WaitingForReplyHandlers.Add(userID, h)
+	case joinChangeWishlistButton:
+		users := db.ReadUsers()
+		if user, ok := users.Get(usr.UserId(userID)); ok {
+			startWishlistFlow(bot, chatID, userID, messageID, user)
+		}
+	case joinAllOkButton:
+		bot.SendPic(chatID, "Ну и славненько", res.Ok)
+	default:
+		bot.SendPic(chatID, "Ты откуда вообще взял эту кнопку, тут ее не должно быть!", res.Error)
+	}
 	return nil
 }
 
