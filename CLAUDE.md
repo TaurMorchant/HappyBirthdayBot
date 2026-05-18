@@ -11,9 +11,9 @@ All Go code lives in `service/`. Commands must be run from that directory.
 cd service && go build -o bot .
 
 # Run locally (requires TELEGRAM_BOT_TOKEN env var and a config directory path as CLI arg)
+# Configs live in HappyBirthdayBot-configs repo under profiles/<env>/configs/
 $env:TELEGRAM_BOT_TOKEN="<token>"
-.\bot configs-test     # test environment
-.\bot configs-prod     # production
+.\bot <path-to-configs>     # e.g. ../../HappyBirthdayBot-configs/profiles/test/configs
 
 # Tests
 cd service && go test ./...
@@ -85,7 +85,7 @@ Config directory is passed as the first CLI argument (e.g., `configs-test` or `c
 | `allowedChats.properties` | `<chatId>: <name>` — additional allowed chats beyond birthday chats |
 | `birthdayChats.csv` | `UserId, Name, ChatLink, ChatId` — per-person birthday discussion chats |
 
-Two environments exist: `configs-test/` (committed) and `configs-prod/` (gitignored).
+Config files live in the `HappyBirthdayBot-configs` repository under `profiles/<env>/configs/`.
 
 ## Environment Variable
 

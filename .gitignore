@@ -12,7 +12,6 @@
 
 # Secrets
 .env
-configs-prod/
 
 # Logs
 service/logs/
