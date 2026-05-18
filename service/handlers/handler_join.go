@@ -24,7 +24,7 @@ type JoinHandler struct {
 }
 
 func (h JoinHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
-	log.Printf("handle join command")
+	log.Printf("handle my_birthday command")
 	chatID := update.Message.Chat.ID
 	userID := update.Message.From.ID
 	messageID := update.Message.MessageID

@@ -22,7 +22,7 @@ func (h WishlistHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	if user, ok := users.Get(usr.UserId(userID)); ok {
 		startWishlistFlow(bot, chatID, userID, messageID, user)
 	} else {
-		bot.SendPic(chatID, "Кажется ты еще не зарегистрирован в программе! Зарегистрируйся при помощи команды [/join](/join)!", res.Suspicious)
+		bot.SendPic(chatID, "Кажется ты еще не зарегистрирован в программе! Зарегистрируйся при помощи команды [/my\\_birthday](/my_birthday)!", res.Suspicious)
 	}
 
 	return nil

@@ -6,7 +6,7 @@ const (
 	Start     = "start"
 	List      = "list"
 	Reminders = "reminders"
-	Join      = "join"
+	Join      = "my_birthday"
 	Wishlist  = "wishlist"
 	Exit      = "exit"
 )
@@ -14,7 +14,7 @@ const (
 var Commands = []tgbotapi.BotCommand{
 	{Command: List, Description: "Все дни рождения"},
 	{Command: Reminders, Description: "Ближайшие дни рождения"},
-	{Command: Join, Description: "Присоединиться к программе"},
+	{Command: Join, Description: "Мой день рождения"},
 	{Command: Wishlist, Description: "Настроить свой Wishlist"},
 	{Command: Exit, Description: "Выйти из программы"},
 }
