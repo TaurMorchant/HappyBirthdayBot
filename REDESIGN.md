@@ -76,7 +76,7 @@ profiles/
 - `profiles/prod/scripts/seed.sql` — 19 реальных записей из Google Sheets
 - `profiles/test/scripts/seed.sql` — 3 фиктивные записи для проверки напоминалок
 - `seed.sql` деплоится на VPS вместе с конфигами через workflow Deploy
-- Workflow `seed.yml`: ручной запуск, выбор окружения (`prod`/`test`), выполняет `sqlite3 data.db < seed.sql`
+- Чекбокс `seed` в workflow Deploy: опциональный шаг после деплоя, выполняет `sqlite3 data.db < seed.sql`
 - `INSERT OR IGNORE` — безопасно запускать повторно
 
 **Статус: выполнено**
