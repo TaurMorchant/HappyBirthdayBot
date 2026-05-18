@@ -2,13 +2,19 @@ package handlers
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"happy-birthday-bot/db"
 	"happy-birthday-bot/mybot"
-	"happy-birthday-bot/resources"
+	res "happy-birthday-bot/resources"
 	"happy-birthday-bot/usr"
 	"log"
+	"strconv"
+	"strings"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
+
+const viewOthersButton = "view_others"
+const viewUserPrefix = "view_user_"
 
 type WishlistHandler struct {
 }
@@ -29,22 +35,24 @@ func (h WishlistHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 }
 
 func startWishlistFlow(bot *mybot.Bot, chatID int64, userID int64, messageID int, user *usr.User) {
+	var msg string
+	var firstButtonLabel string
+
 	if len(user.Wishlist) == 0 {
-		msg := "Похоже ты еще не составил свой вишлист! Самое время это сделать! Напиши в ответ на это сообщение, что бы ты хотел получить в подарок?"
-		bot.SendPicForceReply(chatID, msg, res.Wishlist, messageID)
-		WaitingForReplyHandlers.Add(userID, WishlistHandler{})
+		msg = "Похоже ты еще не составил свой вишлист! Самое время это сделать!"
+		firstButtonLabel = "Хочу задать"
 	} else {
-		msg := fmt.Sprintf("У тебя сейчас такой вишлист:\n\n```\n%s\n```\n"+
-			"Хочешь его поменять?", user.Wishlist)
-		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("Хочу", okButton),
-				tgbotapi.NewInlineKeyboardButtonData("Не, все норм", cancelButton),
-			),
-		)
-		sentMessage := bot.SendPicWithKeyboard(chatID, msg, res.Wishlist, &inlineKeyboard, messageID)
-		WaitingForCallbackHandlers.Add(sentMessage.MessageID, CallbackElement{UserId: userID, Handler: WishlistHandler{}, OriginalMessageId: messageID})
+		msg = fmt.Sprintf("У тебя сейчас такой вишлист:\n\n```\n%s\n```", user.Wishlist)
+		firstButtonLabel = "Хочу поменять"
 	}
+
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData(firstButtonLabel, okButton)),
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Хочу посмотреть другие", viewOthersButton)),
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Не, все норм", cancelButton)),
+	)
+	sentMessage := bot.SendPicWithKeyboard(chatID, msg, res.Wishlist, &inlineKeyboard, messageID)
+	WaitingForCallbackHandlers.Add(sentMessage.MessageID, CallbackElement{UserId: userID, Handler: WishlistHandler{}, OriginalMessageId: messageID})
 }
 
 func (h WishlistHandler) HandleReply(bot *mybot.Bot, update tgbotapi.Update) error {
@@ -63,18 +71,49 @@ func (h WishlistHandler) HandleCallback(bot *mybot.Bot, update tgbotapi.Update, 
 	chatID := update.CallbackQuery.Message.Chat.ID
 	userID := update.CallbackQuery.From.ID
 	messageID := update.CallbackQuery.Message.MessageID
+	data := update.CallbackQuery.Data
 
-	if update.CallbackQuery.Data == okButton {
+	if data == okButton {
 		msg := "Напиши в ответ на это сообщение, что бы ты хотел получить в подарок?"
-		var messageToReplyId int
-		if callback.OriginalMessageId != 0 {
-			messageToReplyId = callback.OriginalMessageId
-		} else {
+		messageToReplyId := callback.OriginalMessageId
+		if messageToReplyId == 0 {
 			messageToReplyId = messageID
 		}
 		bot.SendPicForceReply(chatID, msg, res.Wishlist, messageToReplyId)
 		WaitingForReplyHandlers.Add(userID, h)
-	} else if update.CallbackQuery.Data == cancelButton {
+	} else if data == viewOthersButton {
+		users := db.ReadUsers()
+		var rows [][]tgbotapi.InlineKeyboardButton
+		for _, u := range users.AllUsers() {
+			rows = append(rows, tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData(u.Name, viewUserPrefix+strconv.FormatInt(int64(u.Id), 10)),
+			))
+		}
+		keyboard := tgbotapi.NewInlineKeyboardMarkup(rows...)
+		sentMessage := bot.SendPicWithKeyboard(chatID, "Чей вишлист ты хочешь узнать?", res.Wishlist, &keyboard, 0)
+		WaitingForCallbackHandlers.Add(sentMessage.MessageID, CallbackElement{UserId: userID, Handler: WishlistHandler{}})
+	} else if strings.HasPrefix(data, viewUserPrefix) {
+		targetUserIdStr := strings.TrimPrefix(data, viewUserPrefix)
+		targetUserId, err := strconv.ParseInt(targetUserIdStr, 10, 64)
+		if err != nil {
+			bot.SendPic(chatID, "Что-то пошло не так 😕", res.Suspicious)
+			return nil
+		}
+		users := db.ReadUsers()
+		if targetUser, ok := users.Get(usr.UserId(targetUserId)); ok {
+			var msg string
+			if len(targetUser.Wishlist) == 0 {
+				msg = fmt.Sprintf("У `%s` нет вишлиста :(", targetUser.Name)
+				bot.SendPic(chatID, msg, res.Sad)
+			} else {
+				msg = fmt.Sprintf("У `%s` такой вишлист:\n\n```\n%s\n```", targetUser.Name, targetUser.Wishlist)
+				bot.SendPic(chatID, msg, res.Wishlist)
+			}
+
+		} else {
+			bot.SendPic(chatID, "Такой участник не найден 🤔", res.Suspicious)
+		}
+	} else if data == cancelButton {
 		bot.SendPic(chatID, "Океюшки", res.Ok)
 	} else {
 		bot.SendPic(chatID, "Ты откуда вообще взял эту кнопку, тут ее не должно быть!", res.Suspicious)
