@@ -61,6 +61,15 @@ func (h JoinHandler) HandleReply(bot *mybot.Bot, update tgbotapi.Update) error {
 		return err
 	}
 
+	reactivated, err := db.ReactivateUser(usr.UserId(userID), name, birthDay)
+	if err != nil {
+		log.Panicf("Failed to reactivate user %d: %v", userID, err)
+	}
+	if reactivated {
+		bot.SendPic(chatID, "С возвращением! Теперь тебя снова отхеппибёздят! 🥳", res.Cool)
+		return nil
+	}
+
 	user := usr.User{Id: usr.UserId(userID), Name: name}
 	user.SetBirthday2(birthDay, time.Now())
 

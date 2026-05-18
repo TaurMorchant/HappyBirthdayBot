@@ -8,6 +8,7 @@ import (
 	_ "modernc.org/sqlite"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -35,10 +36,16 @@ func Init(path string) {
 		wishlist           TEXT    NOT NULL DEFAULT '',
 		reminder30days     INTEGER NOT NULL DEFAULT 0,
 		reminder15days     INTEGER NOT NULL DEFAULT 0,
-		birthday_greetings INTEGER NOT NULL DEFAULT 0
+		birthday_greetings INTEGER NOT NULL DEFAULT 0,
+		disabled           INTEGER NOT NULL DEFAULT 0
 	)`)
 	if err != nil {
 		log.Panic("Failed to init users table:", err)
+	}
+
+	_, err = instance.Exec(`ALTER TABLE users ADD COLUMN disabled INTEGER NOT NULL DEFAULT 0`)
+	if err != nil && !strings.Contains(err.Error(), "duplicate column name") {
+		log.Panic("Failed to migrate users table:", err)
 	}
 
 	log.Println("SQLite initialized:", path)
@@ -46,7 +53,7 @@ func Init(path string) {
 
 func ReadUsers() usr.Users {
 	rows, err := instance.Query(
-		`SELECT id, name, birthday, wishlist, reminder30days, reminder15days, birthday_greetings FROM users`,
+		`SELECT id, name, birthday, wishlist, reminder30days, reminder15days, birthday_greetings FROM users WHERE disabled = 0`,
 	)
 	if err != nil {
 		log.Panic("Failed to read users:", err)
@@ -91,9 +98,21 @@ func InsertUser(user *usr.User) error {
 	return err
 }
 
-func DeleteUser(userId usr.UserId) error {
-	_, err := instance.Exec(`DELETE FROM users WHERE id = ?`, int64(userId))
+func DisableUser(userId usr.UserId) error {
+	_, err := instance.Exec(`UPDATE users SET disabled = 1 WHERE id = ?`, int64(userId))
 	return err
+}
+
+func ReactivateUser(userId usr.UserId, name string, birthday date.Birthday) (bool, error) {
+	result, err := instance.Exec(
+		`UPDATE users SET disabled = 0, name = ?, birthday = ? WHERE id = ? AND disabled = 1`,
+		name, birthday.ToString(), int64(userId),
+	)
+	if err != nil {
+		return false, err
+	}
+	rows, err := result.RowsAffected()
+	return rows > 0, err
 }
 
 func UpdateWishlist(userId usr.UserId, wishlist string) error {

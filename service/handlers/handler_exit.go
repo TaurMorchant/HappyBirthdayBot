@@ -1,12 +1,13 @@
 package handlers
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"happy-birthday-bot/db"
 	"happy-birthday-bot/mybot"
 	res "happy-birthday-bot/resources"
 	"happy-birthday-bot/usr"
 	"log"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type ExitHandler struct {
@@ -23,7 +24,7 @@ func (h ExitHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	users := db.ReadUsers()
 
 	if _, ok := users.Get(usr.UserId(userID)); ok {
-		msg := "Ты уверен, что хочешь уйти из программы и не желаешь быть отхеппибёзднутым?"
+		msg := "Ты уверен, что не желаешь быть отхеппибёзднутым?"
 
 		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
@@ -51,10 +52,10 @@ func (h ExitHandler) HandleCallback(bot *mybot.Bot, update tgbotapi.Update, _ Ca
 	userID := update.CallbackQuery.From.ID
 
 	if update.CallbackQuery.Data == okButton {
-		if err := db.DeleteUser(usr.UserId(userID)); err != nil {
-			log.Panicf("Failed to delete user %d: %v", userID, err)
+		if err := db.DisableUser(usr.UserId(userID)); err != nil {
+			log.Panicf("Failed to disable user %d: %v", userID, err)
 		}
-		bot.SendPic(chatID, "Штош, ты удален", res.Sad)
+		bot.SendPic(chatID, "Штош, больше о твоем ДР никто не узнет", res.Sad)
 	} else if update.CallbackQuery.Data == cancelButton {
 		bot.SendPic(chatID, "Да ладно, ладно, не ори!", res.DoNotScream)
 	} else {
