@@ -6,8 +6,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 All Go code lives in `service/`. Commands must be run from that directory.
 
+**IMPORTANT for Claude Code (Bash tool):** Bash tool — это Git Bash на Windows. Использовать прямые слэши `C:/...`, не обратные `C:\...`. PowerShell не использовать — запрашивает разрешение каждый раз.
+
 ```bash
-# Build
+# Build (Claude Code)
+cd "C:/git/TaurMorchant/HappyBirthdayBot/HappyBirthdayBot/service" && go build ./... 2>&1 | tail -20
+
+# Tests (Claude Code)
+cd "C:/git/TaurMorchant/HappyBirthdayBot/HappyBirthdayBot/service" && go test ./... 2>&1 | tail -30
+```
+
+```bash
+# Build (пользователь в терминале)
 cd service && go build -o bot .
 
 # Run locally (requires TELEGRAM_BOT_TOKEN env var and a config directory path as CLI arg)
@@ -15,7 +25,7 @@ cd service && go build -o bot .
 $env:TELEGRAM_BOT_TOKEN="<token>"
 .\bot <path-to-configs>     # e.g. ../../HappyBirthdayBot-configs/profiles/test/configs
 
-# Tests
+# Tests (for user in terminal)
 cd service && go test ./...
 
 # Single test
