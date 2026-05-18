@@ -8,12 +8,12 @@ All Go code lives in `service/`. Commands must be run from that directory.
 
 ```bash
 # Build
-cd service && go build -o h_b_bot_5.exe .
+cd service && go build -o bot .
 
-# Run (requires TELEGRAM_BOT_TOKEN env var and a config directory path as CLI arg)
+# Run locally (requires TELEGRAM_BOT_TOKEN env var and a config directory path as CLI arg)
 $env:TELEGRAM_BOT_TOKEN="<token>"
-.\h_b_bot_5.exe configs-test     # test environment
-.\h_b_bot_5.exe configs-prod     # production (also via run_bot5_prod.bat)
+.\bot configs-test     # test environment
+.\bot configs-prod     # production
 
 # Tests
 cd service && go test ./...
@@ -21,6 +21,15 @@ cd service && go test ./...
 # Single test
 cd service && go test ./handlers/... -run Test_getDaysWord
 ```
+
+## Docker
+
+CI builds and publishes the image automatically on every push to `main`:
+```
+ghcr.io/taurmorchant/happybirthdaybot:latest
+```
+
+The image expects a config directory mounted at `/config` (default `CMD`). Deploy is triggered manually via the `HappyBirthdayBot-configs` repository — see that repo's `CLAUDE.md`.
 
 ## Architecture Overview
 
