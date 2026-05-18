@@ -9,7 +9,7 @@ const (
 	Join      = "my_birthday"
 	Wishlist  = "wishlist"
 	Exit      = "exit"
-	Answer    = "answer"
+	Answer    = "a"
 )
 
 var Commands = []tgbotapi.BotCommand{
