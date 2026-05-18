@@ -34,7 +34,11 @@ func (h JoinHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
 				tgbotapi.NewInlineKeyboardButtonData("Поменять данные", joinChangeDataButton),
+			),
+			tgbotapi.NewInlineKeyboardRow(
 				tgbotapi.NewInlineKeyboardButtonData("Задать вишлист", joinChangeWishlistButton),
+			),
+			tgbotapi.NewInlineKeyboardRow(
 				tgbotapi.NewInlineKeyboardButtonData("Все ок", joinAllOkButton),
 			),
 		)
@@ -90,18 +94,17 @@ func (h JoinHandler) HandleCallback(bot *mybot.Bot, update tgbotapi.Update, call
 	log.Println("Handle callback for JoinHandler")
 	chatID := update.CallbackQuery.Message.Chat.ID
 	userID := update.CallbackQuery.From.ID
-	messageID := update.CallbackQuery.Message.MessageID
 
 	switch update.CallbackQuery.Data {
 	case joinChangeDataButton:
 		msg := "Отлично! Ответь на это сообщение вот так:\n\n`<Твое имя>, <Твоя дата рождения>`\n\n" +
 			"Например:\n\n`Вася Пупкин, 25.03`\n\nили\n\n`Вася Пупкин, 25 марта`"
-		bot.SendPicForceReply(chatID, msg, res.Waiting, messageID)
+		bot.SendPicForceReply(chatID, msg, res.Waiting, callback.OriginalMessageId)
 		WaitingForReplyHandlers.Add(userID, h)
 	case joinChangeWishlistButton:
 		users := db.ReadUsers()
 		if user, ok := users.Get(usr.UserId(userID)); ok {
-			startWishlistFlow(bot, chatID, userID, messageID, user)
+			startWishlistFlow(bot, chatID, userID, callback.OriginalMessageId, user)
 		}
 	case joinAllOkButton:
 		bot.SendPic(chatID, "Ну и славненько", res.Ok)
