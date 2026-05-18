@@ -35,7 +35,7 @@
 
 ---
 
-## 3. Реструктуризация директорий по профилям
+## ✅ 3. Реструктуризация директорий по профилям
 
 **Что:** Заменить плоскую структуру `configs-prod/`, `configs-test/`, `data-prod/`, `data-test/` на структуру по профилям.
 
@@ -62,16 +62,21 @@ profiles/
 - `HappyBirthdayBot-configs`: структура репо, пути в deploy workflow, volume-маппинги в docker-compose
 - Локальный запуск: команда в README/CLAUDE.md
 
+**Статус: выполнено**
+
 ---
 
-## 4. Первоначальная загрузка данных из Google Forms
+## ✅ 4. Первоначальная загрузка данных из Google Forms
 
 **Что:** Ручной GitHub Actions workflow, который применяет SQL-скрипт с начальными данными на VPS.
 
 **Зачем:** При первом деплое база пустая. Данные участников (имена, даты рождения, вишлисты) уже собраны в Google Forms — нужен способ загрузить их в SQLite без ручного SSH на сервер.
 
 **Детали реализации:**
-- Данные из Google Forms выгружаются вручную в SQL INSERT-скрипт (`seed.sql`)
-- Workflow копирует `seed.sql` на VPS и выполняет `sqlite3 data.db < seed.sql`
-- Запускается один раз для первоначального наполнения; после этого данные ведутся через бота (`/wishlist`) и напрямую в базе
-- Workflow живёт в репо `HappyBirthdayBot-configs`
+- `profiles/prod/scripts/seed.sql` — 19 реальных записей из Google Sheets
+- `profiles/test/scripts/seed.sql` — 3 фиктивные записи для проверки напоминалок
+- `seed.sql` деплоится на VPS вместе с конфигами через workflow Deploy
+- Workflow `seed.yml`: ручной запуск, выбор окружения (`prod`/`test`), выполняет `sqlite3 data.db < seed.sql`
+- `INSERT OR IGNORE` — безопасно запускать повторно
+
+**Статус: выполнено**

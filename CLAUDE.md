@@ -76,7 +76,7 @@ Birthday format: `"25 марта"` (day + Russian month name). DB opened with WA
 
 ## Configuration Files
 
-Config directory is passed as the first CLI argument (e.g., `configs-test` or `configs-prod`).
+Config directory is passed as the first CLI argument (e.g., `../../HappyBirthdayBot-configs/profiles/test/configs`).
 
 | File | Purpose |
 |---|---|
