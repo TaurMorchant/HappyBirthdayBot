@@ -14,6 +14,8 @@ var Handlers = map[string]IHandler{
 	mybot.Reminders: &RemindHandler{},
 	mybot.Wishlist:  &WishlistHandler{},
 	mybot.Answer:    &AnswerHandler{},
+	mybot.Select:    &SelectHandler{},
+	mybot.Exec:      &ExecHandler{},
 }
 
 type CallbackElement struct {

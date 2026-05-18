@@ -10,6 +10,8 @@ const (
 	Wishlist  = "wishlist"
 	Exit      = "exit"
 	Answer    = "a"
+	Select    = "select"
+	Exec      = "exec"
 )
 
 var Commands = []tgbotapi.BotCommand{

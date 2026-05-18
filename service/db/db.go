@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"happy-birthday-bot/date"
 	"happy-birthday-bot/usr"
 	"log"
@@ -139,6 +140,60 @@ func UpdateFlags(user *usr.User) error {
 		int64(user.Id),
 	)
 	return err
+}
+
+func QueryRaw(query string) (string, error) {
+	rows, err := instance.Query(query)
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+
+	cols, err := rows.Columns()
+	if err != nil {
+		return "", err
+	}
+
+	var sb strings.Builder
+	sb.WriteString(strings.Join(cols, " | "))
+	sb.WriteString("\n")
+
+	vals := make([]interface{}, len(cols))
+	ptrs := make([]interface{}, len(cols))
+	for i := range vals {
+		ptrs[i] = &vals[i]
+	}
+
+	rowCount := 0
+	for rows.Next() {
+		if err := rows.Scan(ptrs...); err != nil {
+			return "", err
+		}
+		parts := make([]string, len(cols))
+		for i, v := range vals {
+			if v == nil {
+				parts[i] = "NULL"
+			} else {
+				parts[i] = fmt.Sprintf("%v", v)
+			}
+		}
+		sb.WriteString(strings.Join(parts, " | "))
+		sb.WriteString("\n")
+		rowCount++
+	}
+	if rowCount == 0 {
+		sb.WriteString("(no rows)")
+	}
+	return sb.String(), rows.Err()
+}
+
+func ExecRaw(query string) (string, error) {
+	result, err := instance.Exec(query)
+	if err != nil {
+		return "", err
+	}
+	n, _ := result.RowsAffected()
+	return fmt.Sprintf("OK (%d rows affected)", n), nil
 }
 
 func boolToInt(b bool) int {
