@@ -3,16 +3,17 @@ package mybot
 import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
 const (
-	Start     = "start"
-	List      = "list"
-	Reminders = "reminders"
-	Join      = "my_birthday"
-	Wishlist  = "wishlist"
-	Exit      = "exit"
-	Answer    = "a"
-	Select    = "select"
-	Exec      = "exec"
-	Remind    = "remind"
+	Start       = "start"
+	List        = "list"
+	Reminders   = "reminders"
+	Join        = "my_birthday"
+	Wishlist    = "wishlist"
+	Exit        = "exit"
+	Answer      = "a"
+	Select      = "select"
+	Exec        = "exec"
+	Remind      = "remind"
+	GoodMorning = "good_morning"
 )
 
 var Commands = []tgbotapi.BotCommand{
@@ -21,6 +22,7 @@ var Commands = []tgbotapi.BotCommand{
 	{Command: Join, Description: "Мой день рождения"},
 	{Command: Wishlist, Description: "Настроить свой Wishlist"},
 	{Command: Exit, Description: "Выйти из программы"},
+	{Command: GoodMorning, Description: "Пожелать доброго утра"},
 }
 
 var AdminCommands = []tgbotapi.BotCommand{

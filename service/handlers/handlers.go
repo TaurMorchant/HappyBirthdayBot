@@ -7,16 +7,17 @@ import (
 )
 
 var Handlers = map[string]IHandler{
-	mybot.Start:     &StartHandler{},
-	mybot.Join:      &JoinHandler{},
-	mybot.Exit:      &ExitHandler{},
-	mybot.List:      &ListHandler{},
-	mybot.Reminders: &RemindHandler{},
-	mybot.Wishlist:  &WishlistHandler{},
-	mybot.Answer:    &AnswerHandler{},
-	mybot.Select:    &SelectHandler{},
-	mybot.Exec:      &ExecHandler{},
-	mybot.Remind:    &RunReminderHandler{},
+	mybot.Start:       &StartHandler{},
+	mybot.Join:        &JoinHandler{},
+	mybot.Exit:        &ExitHandler{},
+	mybot.List:        &ListHandler{},
+	mybot.Reminders:   &RemindHandler{},
+	mybot.Wishlist:    &WishlistHandler{},
+	mybot.Answer:      &AnswerHandler{},
+	mybot.Select:      &SelectHandler{},
+	mybot.Exec:        &ExecHandler{},
+	mybot.Remind:      &RunReminderHandler{},
+	mybot.GoodMorning: &GoodMorningHandler{},
 }
 
 type CallbackElement struct {

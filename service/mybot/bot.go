@@ -60,6 +60,10 @@ func (b *Bot) SendPic(chatId int64, text string, imageKey res.ImageKey) *tgbotap
 	return b.sendWithOptions(chatId, text, imageKey, nil, 0, false)
 }
 
+func (b *Bot) SendPicBytes(chatId int64, text string, file []byte) *tgbotapi.Message {
+	return b.sendPicInternal(chatId, text, file, nil, 0, false)
+}
+
 func (b *Bot) SendPicForceReply(chatId int64, text string, imageKey res.ImageKey, replyToMessageId int) *tgbotapi.Message {
 	return b.sendWithOptions(chatId, text, imageKey, nil, replyToMessageId, true)
 }
