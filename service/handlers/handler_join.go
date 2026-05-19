@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"errors"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"fmt"
 	"happy-birthday-bot/date"
 	"happy-birthday-bot/db"
 	"happy-birthday-bot/mybot"
@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 const Layout = "02.01.2006"
@@ -30,7 +32,7 @@ func (h JoinHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	messageID := update.Message.MessageID
 
 	users := db.ReadUsers()
-	if _, ok := users.Get(usr.UserId(userID)); ok {
+	if user, ok := users.Get(usr.UserId(userID)); ok {
 		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
 				tgbotapi.NewInlineKeyboardButtonData("Поменять данные", joinChangeDataButton),
@@ -42,14 +44,15 @@ func (h JoinHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 				tgbotapi.NewInlineKeyboardButtonData("Все ок", joinAllOkButton),
 			),
 		)
-		sentMessage := bot.SendPicWithKeyboard(chatID, "Ты уже зарегистрирован! 😎", res.Cool, &inlineKeyboard, messageID)
+		msg1 := fmt.Sprintf("Я тебя уже знаю, `%v`! Твой день рождения `%v` 😎", user.Name, user.BirthDay().ToString())
+		sentMessage := bot.SendPicWithKeyboard(chatID, msg1, res.Cool, &inlineKeyboard, messageID)
 		WaitingForCallbackHandlers.Add(sentMessage.MessageID, CallbackElement{UserId: userID, Handler: h, OriginalMessageId: messageID})
 		return nil
 	}
 
-	msg := "Отлично! Ответь на это сообщение вот так:\n\n`<Твое имя>, <Твоя дата рождения>`\n\n" +
+	msg2 := "Отлично! Ответь на это сообщение вот так:\n\n`<Твое имя>, <Твоя дата рождения>`\n\n" +
 		"Например:\n\n`Вася Пупкин, 25.03`\n\nили\n\n`Вася Пупкин, 25 марта`"
-	bot.SendPicForceReply(chatID, msg, res.Waiting, messageID)
+	bot.SendPicForceReply(chatID, msg2, res.Waiting, messageID)
 	WaitingForReplyHandlers.Add(userID, h)
 	return nil
 }

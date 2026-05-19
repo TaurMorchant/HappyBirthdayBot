@@ -14,7 +14,7 @@ type StartHandler struct {
 func (h StartHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
 
-	msg := "Привет! Я — бот-отхеппибёздыватель! Я вернулся!\n\n" +
+	msg := "Привет! Я — бот-отхеппибёздыватель и я вернулся!\n\n" +
 		"Я помогу вам организовать групповые подарки на дни рождения!\n\n" +
 		"Ты можешь использовать следующие комманды:\n\n"
 	for _, command := range mybot.Commands {
