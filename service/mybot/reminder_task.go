@@ -8,11 +8,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/robfig/cron/v3"
 	"happy-birthday-bot/config"
 	"happy-birthday-bot/db"
 	res "happy-birthday-bot/resources"
 	"happy-birthday-bot/usr"
+
+	"github.com/robfig/cron/v3"
 )
 
 var mainChatId int64
@@ -45,6 +46,10 @@ func StartReminderTask(bot *Bot) {
 }
 
 //---------------------------------------------------------------------------------------
+
+func RunReminderTask(bot *Bot) {
+	isBirthdayComingUp(bot)
+}
 
 func isBirthdayComingUp(bot *Bot) {
 	defer handlePanic(bot)
@@ -207,5 +212,3 @@ func handlePanic(bot *Bot) {
 		bot.SendText(adminChatId, message)
 	}
 }
-
-//todo сделать команду пнутия, которая будет работать только через мою личку

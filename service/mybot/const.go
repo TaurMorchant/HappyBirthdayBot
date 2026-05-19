@@ -12,6 +12,7 @@ const (
 	Answer    = "a"
 	Select    = "select"
 	Exec      = "exec"
+	Remind    = "remind"
 )
 
 var Commands = []tgbotapi.BotCommand{
