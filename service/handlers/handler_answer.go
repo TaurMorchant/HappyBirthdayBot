@@ -28,7 +28,8 @@ func (h AnswerHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 		return nil
 	}
 
-	bot.SendText(mainChatId, update.Message.CommandArguments())
+	text := strings.NewReplacer("_", "\\_", "*", "\\*", "`", "\\`", "[", "\\[").Replace(update.Message.CommandArguments())
+	bot.SendText(mainChatId, text)
 	return nil
 }
 
