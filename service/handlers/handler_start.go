@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"happy-birthday-bot/config"
 	"happy-birthday-bot/mybot"
 	res "happy-birthday-bot/resources"
 
@@ -13,12 +14,20 @@ type StartHandler struct {
 
 func (h StartHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 	chatID := update.Message.Chat.ID
+	isAdmin := chatID == config.GetInt64Property(config.AdminChatIdProp)
 
 	msg := "Привет! Я — бот-отхеппибёздыватель и я вернулся!\n\n" +
 		"Я помогу вам организовать групповые подарки на дни рождения!\n\n" +
 		"Ты можешь использовать следующие комманды:\n\n"
 	for _, command := range mybot.Commands {
 		msg += fmt.Sprintf("[/%s] — %s\n", command.Command, command.Description)
+	}
+	if isAdmin {
+		msg += "\nАдминские команды:\n\n"
+		for _, command := range mybot.AdminCommands {
+			msg += fmt.Sprintf("[/%s] — %s\n", command.Command, command.Description)
+		}
+		bot.RegisterAdminCommands(chatID)
 	}
 	msg += "\nТак же я буду оповещать о ближайших днях рождения и управлять чатиками для обсуждения подарков!"
 	msg += "\n\nА еще я пощу котиков `:3`"

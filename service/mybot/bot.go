@@ -38,6 +38,14 @@ func Register() *Bot {
 	return result
 }
 
+func (b *Bot) RegisterAdminCommands(adminChatId int64) {
+	scope := tgbotapi.NewBotCommandScopeChat(adminChatId)
+	cfg := tgbotapi.NewSetMyCommandsWithScope(scope, append(Commands, AdminCommands...)...)
+	if _, err := b.BotAPI.Request(cfg); err != nil {
+		log.Println("[ERROR] Cannot set admin commands scope:", err)
+	}
+}
+
 func (b *Bot) GetUpdatesChan() tgbotapi.UpdatesChannel {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 10

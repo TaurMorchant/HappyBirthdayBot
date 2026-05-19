@@ -34,6 +34,8 @@ func StartReminderTask(bot *Bot) {
 	mainChatId = config.GetInt64Property(config.MainChatIdProp)
 	adminChatId = config.GetInt64Property(config.AdminChatIdProp)
 
+	bot.RegisterAdminCommands(adminChatId)
+
 	c := cron.New(cron.WithSeconds())
 	_, err := c.AddFunc(config.GetStringProperty(config.ReminderTriggerCronProp), func() {
 		isBirthdayComingUp(bot)
