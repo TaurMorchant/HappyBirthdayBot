@@ -103,10 +103,10 @@ func (h WishlistHandler) HandleCallback(bot *mybot.Bot, update tgbotapi.Update, 
 		if targetUser, ok := users.Get(usr.UserId(targetUserId)); ok {
 			var msg string
 			if len(targetUser.Wishlist) == 0 {
-				msg = fmt.Sprintf("У `%s` нет вишлиста :(", targetUser.Name)
+				msg = fmt.Sprintf("`%s` не знает, чего хочет :(", targetUser.Name)
 				bot.SendPic(chatID, msg, res.Sad)
 			} else {
-				msg = fmt.Sprintf("У `%s` такой вишлист:\n\n```\n%s\n```", targetUser.Name, targetUser.Wishlist)
+				msg = fmt.Sprintf("`%s` хочет:\n\n```\n%s\n```", targetUser.Name, targetUser.Wishlist)
 				bot.SendPic(chatID, msg, res.Wishlist)
 			}
 

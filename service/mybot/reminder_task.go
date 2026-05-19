@@ -2,17 +2,32 @@ package mybot
 
 import (
 	"fmt"
+	"log"
+	"runtime/debug"
+	"sort"
+	"sync"
+	"time"
+
 	"github.com/robfig/cron/v3"
 	"happy-birthday-bot/config"
 	"happy-birthday-bot/db"
 	res "happy-birthday-bot/resources"
 	"happy-birthday-bot/usr"
-	"log"
-	"runtime/debug"
 )
 
 var mainChatId int64
 var adminChatId int64
+
+var (
+	dispatcherMu      sync.Mutex
+	dispatcherRunning bool
+)
+
+type reminderJob struct {
+	user      *usr.User
+	daysUntil int
+	run       func()
+}
 
 func StartReminderTask(bot *Bot) {
 	mainChatId = config.GetInt64Property(config.MainChatIdProp)
@@ -34,25 +49,89 @@ func StartReminderTask(bot *Bot) {
 func isBirthdayComingUp(bot *Bot) {
 	defer handlePanic(bot)
 	log.Println("Check is birthday coming up")
+
 	users := db.ReadUsers()
+
 	for _, user := range users.AllUsers() {
-		if user.DaysBeforeBirthday() == 0 && !user.BirthdayGreetings {
-			handleBirthday(bot, user)
-		} else if user.DaysBeforeBirthday() <= 14 && !user.Reminder15days {
-			handle15Days(bot, user)
-		} else if user.DaysBeforeBirthday() <= 30 && !user.Reminder30days {
-			handle30Days(bot, user)
-		} else if user.DaysBeforeBirthday() > 30 && user.BirthdayGreetings {
+		if user.DaysBeforeBirthday() > 30 && user.BirthdayGreetings {
 			user.BirthdayGreetings = false
 			user.Reminder15days = false
 			user.Reminder30days = false
-		} else {
-			continue
-		}
-		if err := db.UpdateFlags(user); err != nil {
-			log.Panicf("Failed to persist flags for user %d: %v", user.Id, err)
+			if err := db.UpdateFlags(user); err != nil {
+				log.Panicf("Failed to persist flags for user %d: %v", user.Id, err)
+			}
 		}
 	}
+
+	jobs := collectJobs(bot, users)
+	if len(jobs) == 0 {
+		return
+	}
+
+	sort.Slice(jobs, func(i, j int) bool {
+		return jobs[i].daysUntil < jobs[j].daysUntil
+	})
+
+	dispatcherMu.Lock()
+	if dispatcherRunning {
+		dispatcherMu.Unlock()
+		msg := fmt.Sprintf("Диспетчер ещё работает, пропущено %d задание(й)", len(jobs))
+		log.Println(msg)
+		bot.SendText(adminChatId, msg)
+		return
+	}
+	dispatcherRunning = true
+	dispatcherMu.Unlock()
+
+	bot.SendText(adminChatId, fmt.Sprintf("Запускаю очередь напоминаний: %d задание(й), интервал 10 минут", len(jobs)))
+
+	go func() {
+		defer func() {
+			dispatcherMu.Lock()
+			dispatcherRunning = false
+			dispatcherMu.Unlock()
+		}()
+		defer handlePanic(bot)
+
+		for i, job := range jobs {
+			if i > 0 {
+				time.Sleep(1 * time.Minute)
+			}
+			job.run()
+			if err := db.UpdateFlags(job.user); err != nil {
+				log.Panicf("Failed to persist flags for user %d: %v", job.user.Id, err)
+			}
+		}
+
+		bot.SendText(adminChatId, "Очередь напоминаний завершена")
+	}()
+}
+
+func collectJobs(bot *Bot, users usr.Users) []reminderJob {
+	var jobs []reminderJob
+	for _, user := range users.AllUsers() {
+		u := user
+		if u.DaysBeforeBirthday() == 0 && !u.BirthdayGreetings {
+			jobs = append(jobs, reminderJob{
+				user:      u,
+				daysUntil: 0,
+				run:       func() { handleBirthday(bot, u) },
+			})
+		} else if u.DaysBeforeBirthday() <= 14 && !u.Reminder15days {
+			jobs = append(jobs, reminderJob{
+				user:      u,
+				daysUntil: u.DaysBeforeBirthday(),
+				run:       func() { handle15Days(bot, u) },
+			})
+		} else if u.DaysBeforeBirthday() <= 30 && !u.Reminder30days {
+			jobs = append(jobs, reminderJob{
+				user:      u,
+				daysUntil: u.DaysBeforeBirthday(),
+				run:       func() { handle30Days(bot, u) },
+			})
+		}
+	}
+	return jobs
 }
 
 func handleBirthday(bot *Bot, user *usr.User) {
