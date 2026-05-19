@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"log"
+	"strings"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"happy-birthday-bot/config"
 	"happy-birthday-bot/mybot"
@@ -13,8 +16,28 @@ func (h AnswerHandler) Handle(bot *mybot.Bot, update tgbotapi.Update) error {
 		return nil
 	}
 	mainChatId := config.GetInt64Property(config.MainChatIdProp)
+
+	if len(update.Message.Photo) > 0 {
+		photo := update.Message.Photo[len(update.Message.Photo)-1]
+		msg := tgbotapi.NewPhoto(mainChatId, tgbotapi.FileID(photo.FileID))
+		msg.Caption = captionArguments(update.Message.Caption)
+		msg.ParseMode = tgbotapi.ModeMarkdown
+		if _, err := bot.BotAPI.Send(msg); err != nil {
+			log.Println("[ERROR] Cannot forward photo:", err)
+		}
+		return nil
+	}
+
 	bot.SendText(mainChatId, update.Message.CommandArguments())
 	return nil
+}
+
+func captionArguments(caption string) string {
+	idx := strings.Index(caption, " ")
+	if idx == -1 {
+		return ""
+	}
+	return caption[idx+1:]
 }
 
 func (h AnswerHandler) HandleReply(*mybot.Bot, tgbotapi.Update) error {

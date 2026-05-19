@@ -12,6 +12,7 @@ import (
 	"log"
 	"os"
 	"runtime/debug"
+	"strings"
 	"time"
 )
 
@@ -95,6 +96,14 @@ func handleUpdate(bot *mybot.Bot, update tgbotapi.Update) {
 				err := handler.Handle(bot, update)
 				if err != nil {
 					panic(err)
+				}
+			} else if len(update.Message.Photo) > 0 {
+				if cmd := captionCommand(update.Message); cmd != "" {
+					if handler, ok := handlers.Handlers[cmd]; ok {
+						if err := handler.Handle(bot, update); err != nil {
+							panic(err)
+						}
+					}
 				}
 			} else if update.Message.ReplyToMessage != nil && update.Message.ReplyToMessage.From.ID == BotID {
 				handleReply(bot, update)
@@ -209,6 +218,14 @@ func removeButtonAnimation(bot *mybot.Bot, update tgbotapi.Update) {
 	if _, err := bot.Request(callbackCfg); err != nil {
 		log.Panic("Ошибка при обработке callback:", err)
 	}
+}
+
+func captionCommand(msg *tgbotapi.Message) string {
+	if !strings.HasPrefix(msg.Caption, "/") {
+		return ""
+	}
+	cmd := strings.SplitN(msg.Caption[1:], " ", 2)[0]
+	return strings.SplitN(cmd, "@", 2)[0]
 }
 
 func removeInlineButtons(bot *mybot.Bot, update tgbotapi.Update) {
