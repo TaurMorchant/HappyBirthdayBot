@@ -153,7 +153,7 @@ func handleBirthday(bot *Bot, user *usr.User) {
 func handle15Days(bot *Bot, user *usr.User) {
 	log.Printf("handle15Days for user %v", user.Id)
 	birthdayChat := getBirthdayChat(user.Id)
-	msg := fmt.Sprintf("Хочу напомнить, что и двух недель не осталось до момента, когда родится `%s`!", user.Name)
+	msg := fmt.Sprintf("Хочу напомнить, что и двух недель не осталось до момента, когда родится `%s` (`%v`)!", user.Name, user.BirthDay().ToString())
 	if birthdayChat != nil {
 		msg += fmt.Sprintf("\n\nЕсли ты всё ещё не присоединился к обсуждению подарка - самое время: %s", birthdayChat.ChatLink)
 	}
