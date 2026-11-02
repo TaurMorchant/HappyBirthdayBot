@@ -46,7 +46,7 @@ func (u *User) DaysBeforeBirthday() int {
 //--------------------------------------------------------------
 
 func (u *User) calculateDaysBeforeBirthday(timeNow time.Time) int {
-	return calculateDaysBetween(timeNow, u.birthDay.NextBirthday())
+	return calculateDaysBetween(timeNow, u.birthDay.NextBirthday(timeNow))
 }
 
 func calculateDaysBetween(time1 time.Time, time2 time.Time) int {

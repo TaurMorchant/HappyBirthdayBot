@@ -68,12 +68,12 @@ func (b Birthday) CurrentYearBirthday() time.Time {
 	return time.Date(time.Now().Year(), b.month, b.day, 0, 0, 0, 0, time.Local)
 }
 
-func (b Birthday) NextBirthday() time.Time {
-	currentYearBirthday := b.CurrentYearBirthday()
-	if time.Now().Before(currentYearBirthday.Add(24 * time.Hour)) {
+func (b Birthday) NextBirthday(now time.Time) time.Time {
+	currentYearBirthday := time.Date(now.Year(), b.month, b.day, 0, 0, 0, 0, time.Local)
+	if now.Before(currentYearBirthday.Add(24 * time.Hour)) {
 		return currentYearBirthday
 	} else {
-		return time.Date(time.Now().Year()+1, b.month, b.day, 0, 0, 0, 0, time.Local)
+		return time.Date(now.Year()+1, b.month, b.day, 0, 0, 0, 0, time.Local)
 	}
 }
 
