@@ -13,6 +13,7 @@ import (
 	res "happy-birthday-bot/resources"
 	"happy-birthday-bot/usr"
 
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/robfig/cron/v3"
 )
 
@@ -155,7 +156,7 @@ func handle15Days(bot *Bot, user *usr.User) {
 	birthdayChat := getBirthdayChat(user.Id)
 	msg := fmt.Sprintf("Хочу напомнить, что и двух недель не осталось до момента, когда родится `%s` (`%v`)!", user.Name, user.BirthDay().ToString())
 	if birthdayChat != nil {
-		msg += fmt.Sprintf("\n\nЕсли ты всё ещё не присоединился к обсуждению подарка - самое время: %s", birthdayChat.ChatLink)
+		msg += fmt.Sprintf("\n\nЕсли ты всё ещё не присоединился к обсуждению подарка - самое время: %s", tgbotapi.EscapeText(tgbotapi.ModeMarkdown, birthdayChat.ChatLink))
 	}
 	bot.SendPic(mainChatId, msg, res.Random)
 
@@ -168,7 +169,7 @@ func handle30Days(bot *Bot, user *usr.User) {
 	birthdayChat := getBirthdayChat(user.Id)
 	msg := fmt.Sprintf("Псс, ребята! Уже меньше, чем через месяц, `%s` отмечает свой день рождения! Самое время подумать о подарке!", user.Name)
 	if birthdayChat != nil {
-		msg += fmt.Sprintf("\n\nЕсли хочешь обсудить, что подарим, залетай в чат: %s", birthdayChat.ChatLink)
+		msg += fmt.Sprintf("\n\nЕсли хочешь обсудить, что подарим, залетай в чат: %s", tgbotapi.EscapeText(tgbotapi.ModeMarkdown, birthdayChat.ChatLink))
 	} else {
 		msg += fmt.Sprintf("\n\nНо кажется @morchant ещё не завел чатик для обсуждения! Эй, пните его кто-нибудь!")
 	}
